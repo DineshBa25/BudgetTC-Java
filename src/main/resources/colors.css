@@ -1,0 +1,6 @@
+hart-plot-background {
+    -fx-background-color: DIMGRAY;
+ }
+.chart-plot-background {
+    -fx-background-color: transparent;
+ }

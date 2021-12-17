@@ -1,0 +1,39 @@
+13
+3
+7000.0
+Federal Income Tax
+700
+Tax
+FICA
+450.0
+Tax
+Apartment Rent
+800
+Housing
+Utilities
+100
+Transportation
+Health Care
+100
+Health Care
+Food
+250.0
+Housing
+Transportation
+0
+Utilites
+Personal Care
+150.0
+Entertainment
+Entertainment Fund
+150.0
+Entertainment
+Student Debt
+700.0
+Debt
+Savings
+203
+Retirement Savings
+House Savings
+500
+"Other Savings"

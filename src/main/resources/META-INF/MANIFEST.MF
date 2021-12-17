@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Main-Class: com.example.budgettc.budgettcgui
+Class-Path: gson-2.8.9.jar javafx-base-17.0.0.1.jar javafx-graphics-17.0
+ .0.1.jar svgSalamander-1.1.2.4.jar flatlaf-intellij-themes-1.6.1.jar ja
+ vafx-swing-17.0.0.1.jar flatlaf-1.6.1.jar javafx-graphics-17.0.0.1-win.
+ jar javafx-swing-17.0.0.1-win.jar javafx-base-17.0.0.1-win.jar ikonli-c
+ ore-12.2.0.jar validatorfx-0.1.13.jar javafx-web-17.0.0.1-win.jar forms
+ fx-core-11.4.2.jar javafx-fxml-17.0.0.1-win.jar javafx-media-17.0.0.1-w
+ in.jar bootstrapfx-core-0.4.0.jar javafx-media-17.0.0.1.jar javafx-fxml
+ -17.0.0.1.jar flatlaf-extras-1.6.1.jar javafx-web-17.0.0.1.jar ikonli-j
+ avafx-12.2.0.jar tilesfx-17.0.0.jar javafx-controls-17.0.0.1-win.jar ja
+ vafx-controls-17.0.0.1.jar controlsfx-11.1.0.jar
+

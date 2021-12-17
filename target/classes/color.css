@@ -1,0 +1,19 @@
+
+.root { -fx-background-color: transparent; }
+
+.chart-plot-background {
+    -fx-background-color: transparent;
+ }
+
+ .chart-pie-label { /*this is what you need for labels*/
+    -fx-fill: #ffffff;
+    -fx-font-size: 1em;
+}
+.chart-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 2em;
+  }
+
+.chart-legend {
+    -fx-font-size: 1em;
+}
