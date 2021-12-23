@@ -4,54 +4,52 @@ package com.example.budgettc;
 import static java.lang.System.out;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
-import java.awt.image.ColorModel;
 import java.io.*;
 import java.lang.*;
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.net.URL;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.colorchooser.AbstractColorChooserPanel;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-
+import java.util.Random;
 
 
 //Import Flatlaf look and feel
-import com.formdev.flatlaf.FlatDarculaLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme;
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterContrastIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkContrastIJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightContrastIJTheme;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlContrastIJTheme;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkContrastIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme;
-import com.formdev.flatlaf.extras.FlatSVGUtils;
 
 
+import javafx.scene.control.ColorPicker;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PiePlot3D;
-import org.jfree.chart.title.TextTitle;
+import org.jfree.chart.plot.RingPlot;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 
 
 //Import JavaFX
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
-import javafx.scene.layout.AnchorPane;
 
 //Unassigned/General TO_DO Items (For use in Intellij management)
 //todo refactor organize and clean code
@@ -77,20 +75,23 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
 
     //Data Structures
     public static Object[][] storage;
-    private static String[] columnNames = { "Category", "Amount Allocated", "HI" };
+
 
     //UI elements
-    private static JPanel panel;
-    public static JFXPanel chartpanel;
-    private static JFrame frame;
-    private static JTable table;
-    public static JPanel center;
-    public static PieChart pieChart;
-    public static Group root;
+    public static JTabbedPane tabbedPane;
+    public static JPanel tabPane;
+    public static ChartPanel chartpanel;
+    public static JPanel handler;
+    public static JFrame frame;
+    public static JPanel y;
     public static Scene scene;
     public static JFXPanel test;
     public static JPanel cards;
-
+    public static JPanel centerCustimizablePane = new JPanel();
+    public static JPanel eastCustimizablePane = new JPanel();
+    public static JPanel center;
+    public static JPanel eastSide;
+    public static JPanel calcPanel;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, UnsupportedLookAndFeelException  {
@@ -112,155 +113,358 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
         frame = new JFrame("Budget TC - Create a Budget, Calculate your Savings, and Track your Expenses");
-        // frame.setDefaultlook
-        //frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        // GridBagLayout experimentLayout = new GridBagLayout();
-        // 2. Optional: What happens when the frame closes?
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        // frame.setLayout(experimentLayout);
-        // 3. Create components and put them in the frame.
 
-        // ...create emptyLabel...
-        //JLabel one = new JLabel("Hi");
-        //frame.getContentPane().add(one, BorderLayout.CENTER);
-        panel = new JPanel();
-        initializeLookAndFeel(new FlatDarkLaf());
+        initializeFrame(1);
 
-        // print2D(storage);
-        frame.getContentPane().setLayout(new GridBagLayout());
+    }
+    private static PieDataset createDataset() {
 
-        frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("logo2.png")).getImage());
+        DefaultPieDataset dataset = new DefaultPieDataset( );
+        print2D(storage);
+        for(Object[] x: storage)
+        {
+            if(x[1] != null && x[0] != null)
+            {
+                System.out.println(x[0].toString()+"         --          "+  Double.valueOf(x[1].toString()));
+                dataset.setValue(x[0].toString(),  Double.parseDouble(x[1].toString()));
+                out.println("Adding category: " + x[0].toString() +" to chart with value of: "+x[1].toString());
+            }
+        }
+        return dataset;
+    }
 
-        //frame.getContentPane().add(panel, BorderLayout.CENTER);
-        // panel.setLocation(500, 500);
-        //panel.setBounds(0, 350, 500, 1000);
-        // System.out.println("hiiiiiiiiiiiiiiiiiii");
-        JPanel westSide = new JPanel(new GridBagLayout());
-        center = new JPanel(new GridBagLayout());
-        JPanel eastSide = new JPanel(new GridLayout(2,1));
+    static void createChart(int what) {
+        if(what==1) {
+            JFreeChart chart = ChartFactory.createPieChart3D(
+                    "",  // chart title
+                    createDataset(),         // data
+                    true,            // include legend
+                    true,
+                    false);
 
-        GridBagConstraints c = new GridBagConstraints();
-        JButton button = new JButton("Long-Named Button 4");
-        c.fill = GridBagConstraints.BOTH;
-        //c.ipady = 40;      //make this component tall
+            final PiePlot3D plot = (PiePlot3D) chart.getPlot();
+            Random rand = new Random();
+            int upperbound = 200;
+            for(Object x: createDataset().getKeys())
+            {
+                plot.setSectionPaint((Comparable) x,new Color(upperbound, upperbound, 255));
+                if(upperbound > 60)
+                    upperbound -= 50;
+                else
+                    upperbound = 200;
+            }
+
+            plot.setSectionOutlinesVisible(true);
+            plot.setDefaultSectionOutlinePaint(new Color(0,0,0));
+            plot.setStartAngle(270);
+            plot.setForegroundAlpha(1.00f);
+            plot.setInteriorGap(0.02);
+            plot.setCircular(true);
+            plot.setOutlineVisible(false);
+            plot.setBackgroundAlpha(0);
+            //Color trans = new Color(0xFF, 0xFF, 0xFF, 0);
+            plot.getChart().setBackgroundPaint(new java.awt.Color(0, 0, 0, 0));
+            plot.setLabelBackgroundPaint(Color.DARK_GRAY);
+            plot.setLabelPaint(Color.WHITE);
+            plot.getChart().getTitle().setPaint(java.awt.Color.WHITE);
+            plot.getChart().getTitle().setFont(new java.awt.Font("SansSerif", Font.PLAIN, 30));
+            JFreeChart l = plot.getChart();
+            ChartPanel u = new ChartPanel(l);
+            //u.setBackground(java.awt.Color.black);
+            u.setMouseWheelEnabled(true);
+            u.getChart().removeLegend();
+            chartpanel = u;
+        }
+        if(what==2) {
+            JFreeChart chart = ChartFactory.createRingChart(
+                    "",  // chart title
+                    createDataset(),         // data
+                    true,            // include legend
+                    true,
+                    false);
+
+            RingPlot plot = (RingPlot) chart.getPlot();
+            plot.setSectionPaint("One", new Color(160, 160, 255));
+            plot.setSectionPaint("Two", new Color(128, 128, 255 - 32));
+            plot.setSectionPaint("Three", new Color(96, 96, 255 - 64));
+            plot.setSectionPaint("Four", new Color(64, 64, 255 - 96));
+            plot.setSectionPaint("Five", new Color(32, 32, 255 - 128));
+            plot.setSectionPaint("Six", new Color(0, 0, 255 - 144));
+            //plot.setStartAngle(270);
+            plot.setForegroundAlpha(1.00f);
+            plot.setInteriorGap(0.02);
+            plot.setCircular(true);
+            plot.setOutlineVisible(false);
+            plot.setBackgroundAlpha(0);
+            //Color trans = new Color(0xFF, 0xFF, 0xFF, 0);
+            plot.getChart().setBackgroundPaint(new java.awt.Color(0, 0, 0, 0));
+            plot.setLabelBackgroundPaint(Color.DARK_GRAY);
+            plot.setLabelPaint(Color.WHITE);
+            plot.getChart().getTitle().setPaint(java.awt.Color.WHITE);
+
+            plot.setOuterSeparatorExtension(0);
+            plot.setInnerSeparatorExtension(0);
 
 
 
-        JButton b1 = new JButton("END");
-        //b1.setBounds(screenSize.width / 2, screenSize.height / 3, 70, 30);
-        b1.setActionCommand("end");
-        b1.setPreferredSize(new Dimension(500,500));
-        b1.addActionListener(new budgettcgui());
 
-        eastSide.add(b1);
+            JFreeChart l = plot.getChart();
+            ChartPanel u = new ChartPanel(l);
+            //u.setBackground(java.awt.Color.black);
+            u.setMouseWheelEnabled(true);
+            u.getChart().removeLegend();
+            chartpanel = u;
+            tabbedPane = new JTabbedPane();
 
-        JButton b2 = new JButton("Switch Theme");
-        b2.setBounds(screenSize.width / 2, screenSize.height / 5, 150, 30);
-        b2.setActionCommand("SwitchMode");
-        b2.addActionListener(new budgettcgui());
+            JComponent panel1 = chartpanel;
+            ImageIcon icon = new ImageIcon("logo2.png");
+            tabbedPane.addTab("Tab 1",icon, panel1,
+                    "Does nothing");
 
+        }
+
+
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if ("end".equals(e.getActionCommand())) {
+            try{
+                out.println("USER ACTION: Program end requested");
+                storageWriter();
+                out.println("ACTION RESULT: Program ended succesfully!");
+            } catch(java.io.IOException x){
+                out.println("ACTION RESULT: Program ended UNsuccesfully!\ncreateDirectory failed:" + x);
+            }
+            System.exit(0);
+        }
+        else if("Switch-Panel".equals(e.getActionCommand())){
+            if(centerCustimizablePane != handler) {
+                centerCustimizablePane = handler;
+                JPanel jp1 = new JPanel(new GridLayout());
+                jp1.add(createTabbedPane());
+                eastCustimizablePane= jp1;
+            }
+            else {
+                JPanel jp1 = new JPanel(new GridLayout());
+                jp1.add(createTabbedPane());
+                centerCustimizablePane= jp1;
+                eastCustimizablePane = handler;
+            }
+            changePanels(0);
+            frame.revalidate();
+            frame.repaint();
+
+            //out.println("hi---------------------------------------------------------------------------");
+
+
+        }
+    }
+
+
+    //---------------------------INITIALIZE HELPER METHODS HERE-------------------------------------
+    //sets the initial look and feel of the application
+    public static void initializeLookAndFeel(LookAndFeel newLookAndFeel)
+    {
+        out.println("USER ACTION: Look and feel change requested");
+        try {
+            out.println("USER RESULT: Look and feel changing from " + (UIManager.getLookAndFeel()) + " to " + newLookAndFeel);
+            UIManager.setLookAndFeel(newLookAndFeel);
+        } catch (Exception ex) {
+            System.err.println("ERROR: Failed to initialize look and feel");
+        }
+
+        UIManager.put( "Component.focusWidth", 0 );
+        SwingUtilities.updateComponentTreeUI(frame);
+    }
+
+    public static CreateIncomeTable initializeIncomeTable() {
         String[] incomeColumnNames = {"Name", "Amount", "Category"};
         CreateIncomeTable incomeTable = new CreateIncomeTable(storage,incomeColumnNames);
-        //westSide.add(incomeTable);
+        incomeTable.setOpaque(true);
+        return incomeTable;
+    }
 
+    public static CreateTable initializeBudgetTable() {
+        String[] columnNames = { "Category", "Amount Allocated", "HI" };
         CreateTable newContentPane = new CreateTable(storage, columnNames);
         newContentPane.setOpaque(true); // content panes must be opaque
+        return newContentPane;
+    }
 
-
-        // frame.setContentPane(newContentPane);
-        //westSide.add(newContentPane);
-
-        //    frame.add(b2,BorderLayout.NORTH);
-
+    public static CreateSubBudgetTable initializeSubBudgetTable() {
+        String[] columnNames = { "Name", "Amount" , "N/a"};
+        CreateSubBudgetTable newContentPane = new CreateSubBudgetTable(storage, columnNames);
+        newContentPane.setOpaque(true); // content panes must be opaque
+        return newContentPane;
+    }
+    public static CreateExpenseLogTable initializeExpenseTable() {
         String[] expenseColumnNames = { "Expense", "Date Due", "Ammount", "Link" , "Go"};
         CreateExpenseLogTable newExpenseTable = new CreateExpenseLogTable(storage, expenseColumnNames);
-        newContentPane.setOpaque(true); // content panes must be opaque
+        newExpenseTable.setOpaque(true);
+        return newExpenseTable;
+    }
+    public void changePanels(int what){
+        Component[] components = y.getComponents();
+        out.println(components.length);
+        y.remove(1);
+        y.remove(1);
+        //y.remove(2);
 
-        c.weightx = 1;
-        c.weighty = .3;
-        c.gridwidth = 0  ;
-        c.gridx = 0;
-        c.gridy = 0;
-
-        westSide.add(incomeTable,c);
-
-        c.weighty = .45;
-        c.gridy = 1;
-        westSide.add(newContentPane,c);
-
-        c.weighty = .25;
-        c.gridy = 2;
-        westSide.add(newExpenseTable,c);
-
-
-        JButton expenseLogTemp = new JButton("This is where the expense log resource will go");
-        //westSide.add(newExpenseTable);
-        // .add(new JScrollPane(table));
-        JButton endTemp = new JButton(
-                "This is where the calculators will go");
-        eastSide.add(initializeCalculatorPanel());
-
-        //ImageIcon icon = new ImageIcon("Pictures/darkModeLogo.png","logo");
-        //JLabel label1 = new JLabel("Image and Text", icon, JLabel.CENTER);
-        //center.add(label1);
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1;
-        c.weighty = .3;
-        c.gridwidth = 1  ;
-        c.gridx = 0;
-        c.gridy = 0;
-        //c.ipady = (int)screenSize.getHeight()*(3/10);
-        out.println(c.ipady+"-------------------------");
-        center.add(new JButton("I dont know what goes here"),c);
-
-        //JPanel x = new JPanel();
-        //x.setBackground(java.awt.Color.BLUE);
-        //center.add(x,c);
-
-        chartpanel = new JFXPanel();
         GridBagConstraints d = new GridBagConstraints();
         d.fill = GridBagConstraints.BOTH;
+        d.weightx = .5;
+        d.weighty = 1;
+        d.gridwidth = 1;
+        d.gridx = 1;
+        d.gridy = 1;
+        y.add(initializeCenter());
+
+
+        d.fill = GridBagConstraints.BOTH;
         d.weightx = 1;
-        d.weighty = .7;
+        d.weighty = 1;
         d.gridwidth = 1;
         d.gridx = 0;
         d.gridy = 1;
-        d.insets = new Insets(60,0,0,0);  //top padding
+        y.add(initializeEastSide());
 
-        test = new JFXPanel();
-        root = new Group();
+        y.repaint();
+        y.revalidate();
+    }
 
-        //createChart();
-        //scene.setFill(Color.TRANSPARENT);
-        //scene.getStylesheets().add("color.css");
-
-
-        //dataPanel.setPreferredSize(new Dimension(1000,1000));
-        //test.setScene(scene);
-        JPanel f = new JPanel(new BorderLayout());
-
-        //chartpanel.setMinimumSize(cDim);
-        //f.add(test,BorderLayout.CENTER);
-        //test.setBackground(java.awt.Color.PINK);
-        //test.setBackground(java.awt.Color.BLUE);
-        //f.add(new JButton(), BorderLayout.CENTER);
-
-        //center.add(f,d);
-        JFreeChart l = createChart(createDataset( ) );
-        ChartPanel u = new ChartPanel(l);
-        //u.setBackground(java.awt.Color.black);
-        u.setMouseWheelEnabled(true);
-        u.getChart().removeLegend();
-        center.add(u,d);
-        out.println(center.getPreferredSize());
-
-        out.println(chartpanel.getPreferredSize());
-        //cDim = chartpanel.getPreferredSize();
-        //chartpanel.setBounds(100, 300, 1000, 1000);
+    public void initializeFrame(int what){
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        initializeLookAndFeel(new FlatDarkLaf());
+        frame.getContentPane().setLayout(new GridBagLayout());
+        frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("logo3.png")).getImage());
 
 
 
-        //chartpanel.setPreferredSize(new Dimension(1000,1000));
+        GridBagConstraints d = new GridBagConstraints();
+
+        d.insets = new Insets(0,0,0,0);
+        d.fill = GridBagConstraints.HORIZONTAL;
+        d.weightx = 0;
+        d.weighty = 0;
+        d.gridwidth = 0;
+        d.gridx = 0;
+        d.gridy = 0;
+        frame.add(initializeMenuBar(),d);
+
+        y = new JPanel(new GridLayout(0,3));
+        // 4. Size the frame.
+        d.fill = GridBagConstraints.BOTH;
+        d.weightx = .5;
+        d.weighty = 1;
+        d.gridwidth = 1;
+        d.gridx = 0;
+        d.gridy = 1;
+        y.add(initializeWestSide());
+
+        createChart(1);
+        initializeHandler("This is where the handler will go");
+
+
+            centerCustimizablePane = handler;
+            JPanel jp1 = new JPanel(new GridLayout());
+            jp1.add(createTabbedPane());
+            eastCustimizablePane= jp1;
+
+
+
+
+        d.fill = GridBagConstraints.BOTH;
+        d.weightx = .5;
+        d.weighty = 1;
+        d.gridwidth = 1;
+        d.gridx = 1;
+        d.gridy = 1;
+        y.add(initializeCenter());
+
+
+        d.fill = GridBagConstraints.BOTH;
+        d.weightx = 1;
+        d.weighty = 1;
+        d.gridwidth = 1;
+        d.gridx = 0;
+        d.gridy = 1;
+        y.add(initializeEastSide());
+
+
+        frame.add(y,d);
+        frame.pack();
+
+        // 5. Show it.
+        frame.setVisible(true);
+    }
+
+    public static JPanel initializeInfoDiagram() {
+        JPanel info = new JPanel();
+        info.add(new JButton("This is where the summarized calculations will go!"));
+        return info;
+    }
+
+    public static void initializeHandler(String s) {
+        handler = new JPanel(new GridLayout(4,1));
+        JButton x = new JButton(s);
+        x.setFocusable(false);
+        handler.add(x);
+        handler.add(initializeSubBudgetTable());
+        JTextArea textArea = new JTextArea();
+        textArea.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Short Description", TitledBorder.LEFT,
+                TitledBorder.TOP));;
+        textArea.setBackground(new Color(58, 58, 58));
+        textArea.setText("Write about what kinds of expenses go into this category ");
+        //handler.add(textArea);
+        JColorChooser colorChooser = new JColorChooser();
+        colorChooser.getChooserPanels().toString();
+        for(javax.swing.colorchooser.AbstractColorChooserPanel panel: colorChooser.getChooserPanels());
+        out.println("*********************************"+colorChooser.getChooserPanels());
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.setPreviewPanel(new JPanel());
+        //JPanel test = new JPanel(new GridLayout(1,2));
+        JPanel pt = new JPanel();
+        pt.setLayout(new BorderLayout());
+        pt.setBorder(new EmptyBorder(16, 16, 16, 16));
+        JButton chooseColor = new JButton("Choose Color");
+        pt.add(chooseColor);
+
+        ActionListener okActionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                System.out.println("OK Button");
+                System.out.println(colorChooser.getColor());
+            }
+        };
+
+        ActionListener cancelActionListener = new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                System.out.println("Cancel Button");
+            }
+        };
+
+        chooseColor.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+               JColorChooser.createDialog(null,
+                        "Pick a color", true,
+                        colorChooser,okActionListener, cancelActionListener).setVisible(true);
+            }
+        });
+
+
+        //test.add(textArea);
+        //test.add(colorChooser);
+
+        handler.add(pt);
+        handler.setFocusable(false);
+        }
+
+    public static JMenuBar initializeMenuBar(){
+
         JMenuBar menuBar;
         JMenu menu, submenu;
         JMenuItem menuItem;
@@ -310,7 +514,7 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
         themeChooser.addItem("Light");
         themeChooser.addItem("Blue/Orange");
         themeChooser.addItem("Dark/Orange");
-        themeChooser.addItem("Night Owl");
+        themeChooser.addItem("Atom Dark");
         themeChooser.addItem("Space Gray");
         themeChooser.setPreferredSize(themeChooser.getMinimumSize());
         themeChooser.setMaximumSize(themeChooser.getMinimumSize());
@@ -319,153 +523,194 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
         lookAndFeelHashMap.put("Light", new FlatLightLaf() );
         lookAndFeelHashMap.put("Blue/Orange", new FlatMoonlightContrastIJTheme());
         lookAndFeelHashMap.put("Dark/Orange", new FlatArcDarkOrangeIJTheme());
-        lookAndFeelHashMap.put("Night Owl", new FlatNightOwlContrastIJTheme());
-        lookAndFeelHashMap.put("Space Gray", new FlatSpacegrayIJTheme());
+        lookAndFeelHashMap.put("Atom Dark", new FlatAtomOneDarkContrastIJTheme());
+        lookAndFeelHashMap.put("Space Gray", new FlatArcDarkContrastIJTheme());
 
         themeChooser.addActionListener(e -> initializeLookAndFeel((lookAndFeelHashMap.get((String) themeChooser.getSelectedItem()))));
 
+        //out.println(UIManager.getLookAndFeel().getDefaults().getFont());
+
+        menu = new JMenu("Preferences");
+        menu.setMnemonic(KeyEvent.VK_A);
+        menu.getAccessibleContext().setAccessibleDescription(
+                "Choose your app preferences");
+
+        menu.add(tbutton);
+        menuBar.add(menu);
+        menuBar.add(new JMenu("Import"));
+        menuBar.add(new JMenu("Export"));
+        menuBar.add(new JMenu("Help"));
+
+        JPanel panel1 = new JPanel(new FlowLayout());
+        JLabel label1 = new JLabel("Switch Theme:   ");
+        panel1.add(label1);
+        panel1.add(themeChooser);
+        menuBar.add(Box.createHorizontalGlue());
+        themeChooser.setBackground(new Color(255, 255, 255, 11));
+        themeChooser.setBorder(BorderFactory.createEmptyBorder());
+        menuBar.add(label1);
         menuBar.add(themeChooser);
-        d.insets = new Insets(0,0,0,0);
-        d.fill = GridBagConstraints.HORIZONTAL;
-        d.weightx = 0;
-        d.weighty = 0;
-        d.gridwidth = 0;
-        d.gridx = 0;
-        d.gridy = 0;
-        frame.add(menuBar,d);
-
-        JPanel y = new JPanel(new GridLayout(0,3));
-        // 4. Size the frame.
-        d.fill = GridBagConstraints.BOTH;
-        d.weightx = .5;
-        d.weighty = 1;
-        d.gridwidth = 1;
-        d.gridx = 0;
-        d.gridy = 1;
-        y.add(westSide);
 
 
 
-        d.fill = GridBagConstraints.BOTH;
-        d.weightx = .5;
-        d.weighty = 1;
-        d.gridwidth = 1;
-        d.gridx = 1;
-        d.gridy = 1;
-        y.add(center);
-
-
-        d.fill = GridBagConstraints.BOTH;
-        d.weightx = 1;
-        d.weighty = 1;
-        d.gridwidth = 1;
-        d.gridx = 0;
-        d.gridy = 1;
-        y.add(eastSide);
-
-        frame.add(y,d);
-        frame.pack();
-        panel.updateUI();
-        // 5. Show it.
-        frame.setVisible(true);
+        return menuBar;
     }
-    private static PieDataset createDataset() {
 
-        DefaultPieDataset dataset = new DefaultPieDataset( );
-        print2D(storage);
-        for(Object[] x: storage)
+    public static JPanel initializeWestSide() {
+        JPanel westSide = new JPanel(new GridBagLayout());
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+
+        c.weightx = 1;
+        c.weighty = .3;
+        c.gridwidth = 0  ;
+        c.gridx = 0;
+        c.gridy = 0;
+
+        westSide.add(initializeIncomeTable(),c);
+
+        c.weighty = .45;
+        c.gridy = 1;
+        westSide.add(initializeBudgetTable(),c);
+
+
+
+        c.weighty = .25;
+        c.gridy = 2;
+        westSide.add(initializeExpenseTable(),c);
+        return westSide;
+    }
+    public JPanel initializeCenter() {
+        //if(center== null) {
+            center = new JPanel(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.BOTH;
+            c.weightx = 1;
+            c.weighty = .3;
+            c.gridwidth = 1;
+            c.gridx = 0;
+            c.gridy = 0;
+            //out.println(c.ipady+"-------------------------");
+            center.add(new JButton("This is where the summarized calculations will go!"), c);
+
+            JButton switchPanel = new JButton("<|>");
+            switchPanel.setActionCommand("Switch-Panel");
+            switchPanel.addActionListener(new budgettcgui());
+            c.weighty = .005;
+            c.gridx = 0;
+            c.gridy = 1;
+            center.add(switchPanel, c);
+
+            GridBagConstraints d = new GridBagConstraints();
+            d.fill = GridBagConstraints.BOTH;
+            d.weightx = 1;
+            d.weighty = .6;
+            d.gridwidth = 1;
+            d.gridx = 0;
+            d.gridy = 2;
+            d.insets = new Insets(10, 0, 0, 0);
+
+            center.add(centerCustimizablePane, d);
+            center.setFocusable(false);
+        //}
+        /*if(center != null) {
+            center = new JPanel(new GridBagLayout());
+            GridBagConstraints c = new GridBagConstraints();
+            c.fill = GridBagConstraints.BOTH;
+            c.weightx = 1;
+            c.weighty = .3;
+            c.gridwidth = 1;
+            c.gridx = 0;
+            c.gridy = 0;
+            //out.println(c.ipady+"-------------------------");
+            center.add(new JButton("This is where the summarized calculations will go!"), c);
+
+            JButton switchPanel = new JButton("<|>");
+            switchPanel.setActionCommand("Switch-Panel");
+            switchPanel.addActionListener(new budgettcgui());
+            c.weighty = .005;
+            c.gridx = 0;
+            c.gridy = 1;
+            center.add(switchPanel, c);
+
+            GridBagConstraints d = new GridBagConstraints();
+            d.fill = GridBagConstraints.BOTH;
+            d.weightx = 1;
+            d.weighty = .6;
+            d.gridwidth = 1;
+            d.gridx = 0;
+            d.gridy = 2;
+            d.insets = new Insets(10, 0, 0, 0);
+
+            center.add(centerCustimizablePane, d);
+            center.setFocusable(false);
+        }*/
+        return center;
+    }
+    public JPanel initializeEastSide() {
+
+
+        if(eastSide == null) {
+            eastSide = new JPanel(new GridLayout(2, 1));
+            eastCustimizablePane.setFocusable(false);
+            eastSide.add(eastCustimizablePane);
+            calcPanel = initializeCalculatorPanel();
+            eastSide.add(calcPanel);
+        }
+        else if(eastSide!=null)
         {
-            if(x[1] != null || x[0] != null)
-            {
-                dataset.setValue("One", new Double(43.2));
-                dataset.setValue("Two", new Double(10.0));
-                System.out.println(x[0].toString()+"         --          "+  Double.valueOf(x[1].toString()));
-                dataset.setValue(x[0].toString(),  Double.parseDouble(x[1].toString()));
-                out.println("Adding category: " + x[0].toString() +" to chart with value of: "+x[1].toString());
-            }
+            eastSide = new JPanel(new GridLayout(2, 1));
+            eastCustimizablePane.setFocusable(false);
+            eastSide.add(eastCustimizablePane);
+            eastSide.add(calcPanel);
         }
-        return dataset;
+        eastSide.setFocusable(false);
+        return eastSide;
     }
+    public JTabbedPane createTabbedPane() {
+        JTabbedPane tabbedPane = new JTabbedPane();
+        ImageIcon icon = new ImageIcon("logo2.png");
+        createChart(1);
+        JComponent panel1 = chartpanel;
+        tabbedPane.addTab("3D Chart", icon, panel1,
+                "Does nothing");
 
-    private static JFreeChart createChart( PieDataset dataset ) {
-        JFreeChart chart = ChartFactory.createPieChart3D(
-                "Budget Summary" ,  // chart title
-                dataset ,         // data
-                true ,            // include legend
-                true,
-                false);
+        createChart(2);
+        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
-        final PiePlot3D plot = ( PiePlot3D ) chart.getPlot();
-        plot.setStartAngle( 270 );
-        plot.setForegroundAlpha( 0.60f );
-        plot.setInteriorGap( 0.02 );
-        plot.setCircular(true);
-        plot.setOutlineVisible(false);
-        plot.setBackgroundAlpha(0);
-        //Color trans = new Color(0xFF, 0xFF, 0xFF, 0);
-        plot.getChart().setBackgroundPaint(new java.awt.Color(0,0,0,0));
-        plot.setLabelBackgroundPaint(Color.DARK_GRAY);
-        plot.setLabelPaint(Color.WHITE);
-        plot.getChart().getTitle().setPaint(java.awt.Color.WHITE);
-        plot.getChart().getTitle().setFont(new java.awt.Font( "SansSerif", Font.PLAIN, 30 ));
-        return plot.getChart();
-    }
+        JComponent panel2 = new JButton();
+        tabbedPane.addTab("Flat Chart", icon, chartpanel,
+                "Does twice as much nothing");
+        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
-    public void actionPerformed(ActionEvent e) {
-        if ("end".equals(e.getActionCommand())) {
-            try{
-                out.println("USER ACTION: Program end requested");
-                storageWriter();
-                out.println("ACTION RESULT: Program ended succesfully!");
-            } catch(java.io.IOException x){
-                out.println("ACTION RESULT: Program ended UNsuccesfully!\ncreateDirectory failed:" + x);
-            }
-            System.exit(0);
-        }
-        else if ("SwitchMode".equals(e.getActionCommand())) {
-            out.println("USER ACTION: Switch Theme requested");
-            System.out.print(String.valueOf(new FlatDarkLaf()));
-            if (String.valueOf(UIManager.getLookAndFeel()).equals(String.valueOf(new FlatDarkLaf())))
-                try {
-                    UIManager.setLookAndFeel(new FlatIntelliJLaf());
-                } catch (Exception ex) {
-                    System.err.println("Failed to initialize LaF");
-                }
-            else if (String.valueOf(UIManager.getLookAndFeel()).equals(String.valueOf(new FlatIntelliJLaf())))
-                try {
-                    UIManager.setLookAndFeel(new FlatDarkLaf());
-                } catch (Exception ex) {
-                    System.err.println("Failed to initialize LaF");
-                }
-            panel.updateUI();
-            SwingUtilities.updateComponentTreeUI(frame);
-        }
+        JComponent panel3 = new JButton();
+        tabbedPane.addTab("Tab 3", icon, panel3,
+                "Still does nothing");
+        tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 
+        JComponent panel4 =new JButton();
+        panel4.setPreferredSize(new Dimension(410, 50));
+        tabbedPane.addTab("Tab 4", icon, panel4,
+                "Does nothing at all");
+        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
+
+        //Add the tabbed pane to this panel.
+        add(tabbedPane);
+
+        //The following line enables to use scrolling tabs.
+        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+        return tabbedPane;
     }
 
 
-    //---------------------------INITIALIZE HELPER METHODS HERE-------------------------------------
-    //sets the initial look and feel of the application
-    public static void initializeLookAndFeel(LookAndFeel newLookAndFeel)
-    {
-        out.println("USER ACTION: Look and feel change requested");
-        try {
-            out.println("USER RESULT: Look and feel changing from " + (UIManager.getLookAndFeel()) + " to " + newLookAndFeel);
-            UIManager.setLookAndFeel(newLookAndFeel);
-        } catch (Exception ex) {
-            System.err.println("ERROR: Failed to initialize look and feel");
-        }
-
-        UIManager.put( "Component.focusWidth", 0 );
-        SwingUtilities.updateComponentTreeUI(frame);
-    }
 
     // reads data from the file and adds it to the map which hold the data. Returns false if there is no data.
     //todo rework storage system to adjust for if there is no storage file present
     public static boolean storageReader() throws IOException {
 
         try {
-            FileReader fReader = new FileReader("storage.txt");
+            FileReader fReader = new FileReader("storage1.txt");
             BufferedReader reader = new BufferedReader(fReader);
             int colsize = Integer.parseInt(reader.readLine());
             int rowsize = Integer.parseInt(reader.readLine());
@@ -582,6 +827,7 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
         String TEXTPANEL = "text";
         String comboBoxItems[] = { BUTTONPANEL, TEXTPANEL };
         JComboBox cb = new JComboBox(comboBoxItems);
+        cb.setFocusable(false);
         cb.setEditable(false);
         cb.addItemListener(this);
         //comboBoxPane.add(cb);
@@ -631,6 +877,7 @@ public class budgettcgui extends JFrame implements ActionListener, ItemListener{
 
         calcPane.add(menu, BorderLayout.PAGE_START);
         calcPane.add(cards, BorderLayout.CENTER);
+        calcPane.setFocusable(false);
 
 
 //Method came from the ItemListener class implementation,

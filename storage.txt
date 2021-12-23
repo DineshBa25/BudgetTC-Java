@@ -4,14 +4,14 @@
 Federal Income Tax
 1190
 Tax
-FICA Tax
+FICA
 450.0
 Tax
 Apartment Rent
 800
 Housing
 Utilities
-798
+1000
 Transportation
 Health Care
 100.0
@@ -26,13 +26,13 @@ Personal Care
 150.0
 Entertainment
 Entertainment Fund
-1500.0
-Utilites
+150.0
+Entertainment
 Student Debt
 700.0
 Debt
 Savings
-200
+2083
 Retirement Savings
 House Savings
 500

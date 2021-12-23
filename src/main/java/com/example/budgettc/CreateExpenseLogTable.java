@@ -23,8 +23,15 @@ public class CreateExpenseLogTable extends JPanel {
          * };
          */
         Object[][] mat= {{2,1,1,2,null},{1,2,2,1,null}};
-        JTable table = new JTable(mat, columnNames);
+        JTable table = new JTable(mat, columnNames){
+            public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
+            {
+                //Always toggle on single selection
+                super.changeSelection(rowIndex, columnIndex, !extend, extend);
+            }
+        };
         table.setModel(new DefaultTableModel(mat, columnNames));
+
         // table.setLocation(1000, 500);
         TableColumn testColumn = table.getColumnModel().getColumn(4);
         JComboBox<String> comboBox = new JComboBox<>();
@@ -54,6 +61,17 @@ public class CreateExpenseLogTable extends JPanel {
                 TitledBorder.TOP));
         table.getModel().addTableModelListener(new MyTableModelListener(table));
 
+
+        table.getSelectionModel().addListSelectionListener(new RowSelectionListner(table));
+        scrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Expense Table", TitledBorder.CENTER,
+                TitledBorder.TOP));
+        table.setShowGrid(true);
+        table.setBackground(new Color(49, 49, 49));
+        Font ly = new Font("Corbert", Font.BOLD, 12);
+        table.setFont(ly);
+        table.getTableHeader().setBackground(new Color(124, 0, 0));
+        table.getTableHeader().setFont(new Font("Corbert", Font.BOLD, 15));
         //Add the scroll pane to this panel.
         setLayout(new BorderLayout());
         add(scrollPane,BorderLayout.CENTER);

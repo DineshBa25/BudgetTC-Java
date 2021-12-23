@@ -1,4 +1,5 @@
 package com.example.budgettc;
+
 import javax.swing.JPanel;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
@@ -14,8 +15,8 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class CreateTable extends JPanel {
-    public CreateTable(Object[][] storage, String[] columnNames) {
+public class CreateSubBudgetTable extends JPanel {
+    public CreateSubBudgetTable(Object[][] storage, String[] columnNames) {
         // super(new GridLayout(1,0));
 
         /*
@@ -34,41 +35,15 @@ public class CreateTable extends JPanel {
             }
         };
         table.setModel(new DefaultTableModel(storage, columnNames));
-        // table.setLocation(1000, 500);
-        TableColumn testColumn = table.getColumnModel().getColumn(2);
-        JComboBox<String> comboBox = new JComboBox<>();
-        comboBox.addItem("Tax");
-        comboBox.addItem("Utilites");
-        comboBox.addItem("Transportation");
-        comboBox.addItem("Housing");
-        comboBox.addItem("Health Care");
-        comboBox.addItem("Entertainment");
-        comboBox.addItem("Debt");
-        comboBox.addItem("Retirement Savings");
-        comboBox.addItem("\"Other Savings\"");
-
-        testColumn.setCellEditor(new DefaultCellEditor(comboBox));
-
-        // final JTable table = new JTable(storage, columnNames);
-        // table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-        // table.setFillsViewportHeight(true);
-
-        // table.setModel(new DefaultTableModel(new Object[3][3],new
-        // String[]{"Position", "Width", "Height"}));
-
-        // table.getModel().addTableModelListener(new MyTableModelListener(table));
-        // Create the scroll pane and add the table to it.
-        // panel.add(table);
-        // panel.setBounds(0, 350, 1000, 1000);
 
         JScrollPane scrollPane = new JScrollPane(table);
         //scrollPane.setBounds(0, 350, 1000, 100);
         //table.setPreferredSize(new Dimension(1000, 1000));
-       // scrollPane.setSize(1000,1000);
+        // scrollPane.setSize(1000,1000);
         table.getModel().addTableModelListener(new MyTableModelListener(table));
         table.getSelectionModel().addListSelectionListener(new RowSelectionListner(table));
         scrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Budget Table", TitledBorder.CENTER,
+                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Sub-budget Table", TitledBorder.CENTER,
                 TitledBorder.TOP));
 
         // Add the scroll pane to this panel.
@@ -78,7 +53,7 @@ public class CreateTable extends JPanel {
         table.setBackground(new Color(49, 49, 49));
         Font ly = new Font("Corbert", Font.BOLD, 12);
         table.setFont(ly);
-        table.getTableHeader().setBackground(new Color(0, 88, 143));
+        table.getTableHeader().setBackground(new Color(126, 67, 0));
         DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
         table.setDefaultRenderer(table.getColumnClass(0),dtcr);
         dtcr.setHorizontalAlignment(SwingConstants.CENTER);

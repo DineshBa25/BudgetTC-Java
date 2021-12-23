@@ -62,9 +62,25 @@ public class MyTableModelListener extends budgettcgui implements TableModelListe
             } catch(java.io.IOException x){
                     out.println("createDirectory failed:" + x);
             }
-            //scene.(createChart());
-            //createChart();
-            //out.println("hi");
+            createChart(1);
+            if(eastCustimizablePane==handler) {
+                JPanel jp1 = new JPanel(new GridLayout());
+                jp1.add(createTabbedPane());
+                centerCustimizablePane= jp1;
+                centerCustimizablePane.repaint();
+            }
+            else
+            {
+                JPanel jp1 = new JPanel(new GridLayout());
+                jp1.add(createTabbedPane());
+                eastCustimizablePane= jp1;
+                eastCustimizablePane.repaint();
+            }
+
+            changePanels(1);
+
+
+
         }
 
 

@@ -19,11 +19,8 @@ Health Care
 Food
 250.0
 Housing
-Transportation
-0
-Utilites
 Personal Care
-150.0
+150
 Entertainment
 Entertainment Fund
 150.0
@@ -32,7 +29,7 @@ Student Debt
 700.0
 Debt
 Savings
-203
+203.0
 Retirement Savings
 House Savings
 500
