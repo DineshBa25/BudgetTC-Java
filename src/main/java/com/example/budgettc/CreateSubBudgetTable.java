@@ -33,15 +33,22 @@ public class CreateSubBudgetTable extends JPanel {
                 //Always toggle on single selection
                 super.changeSelection(rowIndex, columnIndex, false, false);
             }
+
+            public Dimension getPreferredScrollableViewportSize()
+                {
+                    return new Dimension(100, 200);
+                }
+
         };
         table.setModel(new DefaultTableModel(storage, columnNames));
+
 
         JScrollPane scrollPane = new JScrollPane(table);
         //scrollPane.setBounds(0, 350, 1000, 100);
         //table.setPreferredSize(new Dimension(1000, 1000));
         // scrollPane.setSize(1000,1000);
         table.getModel().addTableModelListener(new MyTableModelListener(table));
-        table.getSelectionModel().addListSelectionListener(new RowSelectionListner(table));
+        //table.getSelectionModel().addListSelectionListener(new RowSelectionListner(table));
         scrollPane.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Sub-budget Table", TitledBorder.CENTER,
                 TitledBorder.TOP));
@@ -50,15 +57,17 @@ public class CreateSubBudgetTable extends JPanel {
         setLayout(new BorderLayout());
         add(scrollPane,BorderLayout.CENTER);
         table.setShowGrid(true);
-        table.setBackground(new Color(49, 49, 49));
-        Font ly = new Font("Corbert", Font.BOLD, 12);
-        table.setFont(ly);
+        //table.setBackground(new Color(49, 49, 49));
+        //Font ly = new Font("Corbert", Font.BOLD, 12);
+        //table.setFont(ly);
         table.getTableHeader().setBackground(new Color(126, 67, 0));
         DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
         table.setDefaultRenderer(table.getColumnClass(0),dtcr);
         dtcr.setHorizontalAlignment(SwingConstants.CENTER);
         table.getTableHeader().setFont(new Font("Corbert", Font.BOLD, 15));
+        scrollPane.setMinimumSize(new Dimension(0,0));
         table.addFocusListener(new FocusAdapter() {
+
             @Override
             public void focusLost(FocusEvent arg0) {
                 table.clearSelection();

@@ -1,0 +1,65 @@
+7000.0
+-Tax
+1400.0
+Federal Income Tax
+700
+State Income Tax
+FICA
+450.0
+-Housing
+1000.0
+Apartment Rent
+800
+Homeowners insurance
+Utilities
+100
+-Transportation
+800.00
+Car Payment
+350.00
+Car Insurance
+120.00
+Car Maintenance Fund
+75.00
+Car Wash
+12.00
+-Health Care
+500.0
+Doctor's Appointments
+100
+Dentist's Appointments
+100
+Orthodontist's Payments
+20
+Optometrists Payments
+40
+Contact Lenses
+35
+Hearing aid Payments
+100
+-Food and Toiletries
+300.0
+Groceries + Toiletries
+250.0
+Restaurant Dining
+100.0
+-Personal
+350.0
+Entertainment Fund
+150.0
+Bali Vacation Fund
+200.0
+-Debt
+800.0
+Student Debt
+700.0
+Medical Loan
+56.0
+-Savings
+750.0
+Savings
+203.0
+House Savings
+500.0
+
+

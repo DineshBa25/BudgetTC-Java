@@ -20,6 +20,11 @@ public class SpringUtilities {
         System.out.println("preferredSize = " + c.getPreferredSize());
         System.out.println("maximumSize = " + c.getMaximumSize());
     }
+    public static Dimension minSize(Component c) {
+        return c.getMinimumSize();
+       //System.out.println("preferredSize = " + c.getPreferredSize());
+        //System.out.println("maximumSize = " + c.getMaximumSize());
+    }
 
     /**
      * Aligns the first <code>rows</code> * <code>cols</code>

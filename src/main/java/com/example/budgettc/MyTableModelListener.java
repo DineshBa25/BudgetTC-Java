@@ -56,23 +56,29 @@ public class MyTableModelListener extends budgettcgui implements TableModelListe
             String columnName = model.getColumnName(column);
             Object data = model.getValueAt(row, column);
             out.println("data in row " + row + " column " + column + " changed to " + data);
-            storage[row][column] = data; 
-            try{
+            if(column == 0)
+            storageMatrix.get(row).setCategoryName(data.toString());
+            if(column == 1)
+            storageMatrix.get(row).setAmountAllocated(Double.parseDouble(data.toString()));
+            /*try{
                 storageWriter();
             } catch(java.io.IOException x){
                     out.println("createDirectory failed:" + x);
-            }
+            }*/
             createChart(1);
+            int currIndex = tabbedPane.getSelectedIndex();
+            createTabbedPane();
+            JPanel jp1 = new JPanel(new GridLayout());
+            tabbedPane.setSelectedIndex(currIndex);
+            jp1.add(tabbedPane);
+
             if(eastCustimizablePane==handler) {
-                JPanel jp1 = new JPanel(new GridLayout());
-                jp1.add(createTabbedPane());
+
                 centerCustimizablePane= jp1;
                 centerCustimizablePane.repaint();
             }
             else
             {
-                JPanel jp1 = new JPanel(new GridLayout());
-                jp1.add(createTabbedPane());
                 eastCustimizablePane= jp1;
                 eastCustimizablePane.repaint();
             }

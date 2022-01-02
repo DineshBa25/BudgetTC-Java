@@ -1,0 +1,39 @@
+<component name="ArtifactManager">
+  <artifact name="budgettc:jar3">
+    <output-path>$PROJECT_DIR$/out/artifacts/budgettc_jar3</output-path>
+    <root id="root">
+      <element id="archive" name="budgettc.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/main/java/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="budgettc" />
+      </element>
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-swing:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-web:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-media:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.controlsfx:controlsfx:11.1.0" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-media:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.kordamp.ikonli:ikonli-core:12.2.0" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-swing:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.kordamp.bootstrapfx:bootstrapfx-core:0.4.0" />
+      <element id="library" level="project" name="Maven: org.kordamp.ikonli:ikonli-javafx:12.2.0" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-base:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: eu.hansolo:tilesfx:17.0.0" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-web:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-fxml:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:win:17.0.0.1" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf-extras:1.6.1" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf-intellij-themes:1.6.1" />
+      <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.9" />
+      <element id="library" level="project" name="Maven: com.formdev:svgSalamander:1.1.2.4" />
+      <element id="library" level="project" name="Maven: net.synedra:validatorfx:0.1.13" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:17.0.0.1" />
+      <element id="library" level="project" name="Maven: com.dlsc.formsfx:formsfx-core:11.4.2" />
+      <element id="library" level="project" name="Maven: com.formdev:flatlaf:1.6.1" />
+      <element id="library" level="project" name="Maven: org.openjfx:javafx-graphics:win:17.0.0.1" />
+    </root>
+  </artifact>
+</component>

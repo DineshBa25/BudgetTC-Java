@@ -1,0 +1,174 @@
+Paycheck 1
+Paycheck
+453.0
+Paycheck 2
+Paycheck
+356.0
+Tenant Income 1
+Rental Income
+745.
+~
+*Food
+735.0
+Groceries
+550.0
+Restaurants
+150.0
+Fast Food
+35.0
+Coffee Shops
+0.0
+*Clothing
+220.0
+Adult Clothing
+135.0
+Kids Clothing
+70.0
+Dry Cleaning
+15.0
+*Debt
+950.0
+Credit Card Debt
+167.0
+Student Loans
+550.0
+Medical Debt
+332.0
+Personal Loans
+17.0
+*Gifts/Charity/Donation
+450.0
+Miscellaneous Gift Fund
+50.0
+Holiday Gift Fund
+50.0
+American Red Cross Donation
+150.0
+American Society for Deaf Children Donation
+200.0
+*Pet
+175.0
+Veterinarian Visits
+50.0
+Muffy's and Aggie's Pet Food
+65.0
+Muffy's Pet Aggie's Toys
+25.0
+Aggie's  Pet Medication
+9.0
+Pet Insurance
+35.0
+*Personal/Fun Money
+1075.0
+Netflix Subscription
+10.99
+Spotify Subscription
+4.99
+Amazon Subscription
+12.99
+Hulu Subscription
+5.79
+Dollar Shave Club Subscription
+127.64
+LastPass Subscription
+4.0
+Technology Fund
+150.0
+Bali Vacation Fund
+400
+Tx -> Colorado Road Trip Fund
+300.0
+*Housing
+2150.0
+Mortgage
+1670.0
+Homeowners Association Fee (HOA)
+89.0
+Home Maintenance/Repair Fund
+340.0
+Home Upgrade Fund
+170.0
+Home Insurance
+367.0
+ADT Home Security System
+14.37
+Lawn Mower
+75.0
+TRUGREEN Lawn Care
+67.0
+Cleaning Supplies
+15.0
+Tools
+55.0
+Furniture
+280.0
+Home Decor
+100.0
+Water
+121.0
+Electricity
+142.0
+Natural Gas
+21.0
+*Kids
+375.0
+Extra-Curricular Activites
+40.0
+Toys
+25.0
+Hastin's Allowance
+0.0
+Maya's Allowance
+75.0
+Hastin's Diapers
+195.0
+Baby Sitter
+200.0
+*Transportation
+1254.0
+Honda Civic Payment
+415.0
+Volkswagen Golf GTi Payment
+450.0
+Car Maintenance Fund
+135.0
+Car Related Fee's (Toll, Registration, etc)
+60.0
+Gasoline
+140.0
+Metro Bus Membership
+20.0
+AAA Road Side Assistance
+20.0
+Statefarm Car Insurance
+154.0
+*Medical
+315.0
+Doctor Visits
+50.0
+Dentist Visits
+65.0
+Optometrist Visits
+75.0
+Maya's Orthodontist Payments
+150.0
+Medications
+35.0
+Glass Fund
+35.0
+Contacts
+40.0
+Vitamins/Supplements
+15.0
+*Insurance
+140.0
+Identity Theft Insurance
+20.0
+Mortgage Insurance
+120.0
+Life Insurance
+0.0
+Disability Insurance
+0.0
+Long-term Care insurance
+175.0

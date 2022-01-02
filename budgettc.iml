@@ -64,5 +64,8 @@
     <orderEntry type="library" name="Maven: org.jfree:jfreechart:1.5.3" level="project" />
     <orderEntry type="library" name="Maven: org.jfree:org.jfree.chart.fx:2.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.jfree:org.jfree.fxgraphics2d:2.1" level="project" />
+    <orderEntry type="library" name="Maven: com.miglayout:miglayout-swing:11.0" level="project" />
+    <orderEntry type="library" name="Maven: com.miglayout:miglayout-core:11.0" level="project" />
+    <orderEntry type="library" name="Maven: com.miglayout:miglayout-parent:11.0" level="project" />
   </component>
 </module>

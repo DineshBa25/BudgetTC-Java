@@ -15,9 +15,9 @@ public class RowSelectionListner extends budgettcgui implements ListSelectionLis
         public void valueChanged(ListSelectionEvent event) {
 
             int viewRow = table.getSelectedRow();
-                System.out.println("A new row was selected!");
-                System.out.println(table.getModel().getValueAt(table.getSelectedRow(),0));
-                initializeHandler("The row containing " + (table.getModel().getValueAt(table.getSelectedRow(),0)).toString() + " was Selected!");
+                //System.out.println("A new row was selected!");
+                System.out.println(table.getClass());
+                initializeHandler(storageMatrix.get(table.getSelectedRow()).getJPanel());
             }
         }
 

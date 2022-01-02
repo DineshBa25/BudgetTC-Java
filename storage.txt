@@ -2,7 +2,7 @@
 3
 7000.0
 Federal Income Tax
-1190
+11900
 Tax
 FICA
 450.0
