@@ -7,6 +7,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 //import javax.swing.table.TableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
@@ -15,24 +16,53 @@ import java.awt.*;
 import static java.lang.System.out;
 
 public class CreateExpenseLogTable extends JPanel {
-    public CreateExpenseLogTable(Object[][] storage, String[] columnNames) {
-        // super(new GridLayout(1,0));
 
-        /*
-         * Object[][] data = { {"Kathy", "Smith", "Snowboarding", new Integer(5), new
-         * Boolean(false)}, {"John", "Doe", "Rowing", new Integer(3), new
-         * Boolean(true)}, {"Sue", "Black", "Knitting", new Integer(2), new
-         * Boolean(false)}, {"Jane", "White", "Speed reading", new Integer(20), new
-         * Boolean(true)}, {"Joe", "Brown", "Pool", new Integer(10), new Boolean(false)}
-         * };
-         */
-        //Object[][] mat= {{2,1,1,2,null},{1,2,2,1,null}};
+    public static JTable expenseLogTable;
+
+    public CreateExpenseLogTable(Object[][] storage, String[] columnNames) {
+
+        System.out.print("Reloading Table");
+        columnNames[0] = "Unallocated Expenses" + " (" + (storage.length) + ")";
         JTable table = new JTable(storage, columnNames){
             public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
             {
                     super.changeSelection(rowIndex, columnIndex, false, false);
 
             }
+            public boolean isCellEditable(int row, int column) {
+                //all cells false
+                return false;
+            }
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column)
+            {
+                Component comp=super.prepareRenderer(renderer,row, column);
+                if( column == 1 &&  Double.valueOf(this.getValueAt(row,1).toString())<= 0)
+                {
+
+                    //comp.setForeground(Color.RED);
+                    comp.setForeground(new Color(0xFF0000));
+                }
+                else if( column == 1 &&  Double.valueOf(this.getValueAt(row,1).toString())> 0)
+                {
+
+                    //comp.setForeground(new Color(0x009600));
+                    comp.setForeground(new Color(0x00A100));
+                }
+                else if (column == 0 && Double.valueOf(this.getValueAt(row, 1).toString()) > 0)
+                {
+                    comp.setForeground(new Color(0xFFFFFF));
+                    //comp.setBackground(new Color(0x212121));
+
+                    comp.setFont(new Font("Corbert", Font.BOLD, 11));
+                }
+                else
+                    comp.setForeground(Color.LIGHT_GRAY);
+                    //comp.setBackground(new Color(0x212121));
+                    return comp;
+
+            }
+
         };
         table.setModel(new DefaultTableModel(storage, columnNames));
 
@@ -54,9 +84,9 @@ public class CreateExpenseLogTable extends JPanel {
         // panel.setBounds(0, 350, 1000, 1000);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createTitledBorder(
+        /*scrollPane.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "Expense Table/Log", TitledBorder.CENTER,
-                TitledBorder.TOP));
+                TitledBorder.TOP));*/
         table.getModel().addTableModelListener(e -> out.println("The expense table was changed"));
 
         table.getColumnModel().getColumn(1).setMaxWidth(100);
@@ -66,14 +96,21 @@ public class CreateExpenseLogTable extends JPanel {
             public void valueChanged(ListSelectionEvent e) {
                 out.println("Expense Selected Row: "+table.getSelectedRow());
                 budgettcgui.initializeHandler(budgettcgui.expenseList.get(table.getSelectedRow()).getExpenseHandler());
-                budgettcgui.center.setResizeWeight(0.4);
-                budgettcgui.center.setDividerLocation(0.4);
+                //budgettcgui.center.setResizeWeight(0.25);
+                //budgettcgui.center.setDividerLocation(0.25);
+
             }
         });
-        scrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Expense Table", TitledBorder.CENTER,
-                TitledBorder.TOP));
-        table.setShowGrid(true);
+        for(int x =0; x < table.getRowCount(); x++){
+            table.prepareRenderer(table.getCellRenderer(x,1),x,1);
+        }
+
+
+        /*scrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(0,new Color(0x05D5D5D, true),new Color(0x646464)), "Unallocated Expense", TitledBorder.CENTER,
+                TitledBorder.TOP));*/
+        //table.setShowGrid(true);
+        table.setShowVerticalLines(true);
         //table.setBackground(new Color(49, 49, 49));
         //Font ly = new Font("Corbert", Font.BOLD, 12);
         //table.setFont(ly);
