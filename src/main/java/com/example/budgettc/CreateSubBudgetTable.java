@@ -15,19 +15,14 @@ import java.awt.event.FocusEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class CreateSubBudgetTable extends JPanel {
-    public CreateSubBudgetTable(Object[][] storage, String[] columnNames) {
-        // super(new GridLayout(1,0));
+import static java.lang.System.out;
 
-        /*
-         * Object[][] data = { {"Kathy", "Smith", "Snowboarding", new Integer(5), new
-         * Boolean(false)}, {"John", "Doe", "Rowing", new Integer(3), new
-         * Boolean(true)}, {"Sue", "Black", "Knitting", new Integer(2), new
-         * Boolean(false)}, {"Jane", "White", "Speed reading", new Integer(20), new
-         * Boolean(true)}, {"Joe", "Brown", "Pool", new Integer(10), new Boolean(false)}
-         * };
-         */
+public class CreateSubBudgetTable extends JPanel {
+    public Object[][] localTableDataStorage;
+    public CreateSubBudgetTable(Object[][] storage, String[] columnNames) {
+        localTableDataStorage = storage;
         JTable table = new JTable(storage, columnNames){
+
             public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
             {
                 //Always toggle on single selection
@@ -44,22 +39,12 @@ public class CreateSubBudgetTable extends JPanel {
 
 
         JScrollPane scrollPane = new JScrollPane(table);
-        //scrollPane.setBounds(0, 350, 1000, 100);
-        //table.setPreferredSize(new Dimension(1000, 1000));
-        // scrollPane.setSize(1000,1000);
         table.getModel().addTableModelListener(new MyTableModelListener(table));
-        //table.getSelectionModel().addListSelectionListener(new RowSelectionListner(table));
-        scrollPane.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Sub-budget Table", TitledBorder.CENTER,
-                TitledBorder.TOP));
 
-        // Add the scroll pane to this panel.
         setLayout(new BorderLayout());
         add(scrollPane,BorderLayout.CENTER);
-        table.setShowGrid(true);
-        //table.setBackground(new Color(49, 49, 49));
-        //Font ly = new Font("Corbert", Font.BOLD, 12);
-        //table.setFont(ly);
+        table.setShowVerticalLines(true);
+
         table.getTableHeader().setBackground(new Color(126, 67, 0));
         DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
         table.setDefaultRenderer(table.getColumnClass(0),dtcr);
@@ -74,6 +59,20 @@ public class CreateSubBudgetTable extends JPanel {
             }
 
         });
-    }
 
+
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                if(!e.getValueIsAdjusting() && table.getSelectedRow()>=0) {
+                    out.println(BudgetCategory.localSubBudgetInstanceMap);
+                    out.println(table.getValueAt(table.getSelectedRow(),0) + " Selected");
+                    budgettcgui.subBudgetExpenseTable.deleteAll();
+                    budgettcgui.subBudgetExpenseTable.addRow(BudgetCategory.localSubBudgetInstanceMap.get(table.getValueAt(table.getSelectedRow(),0)));}
+                }
+
+
+    });
+
+}
 }

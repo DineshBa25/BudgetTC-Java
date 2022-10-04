@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="budgettc:jar4">
+  <artifact build-on-make="true" name="budgettc:jar4">
     <output-path>$PROJECT_DIR$/out/artifacts/budgettc_jar4</output-path>
     <root id="root">
       <element id="archive" name="budgettc.jar">
@@ -31,6 +31,8 @@
       <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:win:17.0.0.1" />
       <element id="library" level="project" name="Maven: org.openjfx:javafx-controls:17.0.0.1" />
       <element id="library" level="project" name="Maven: org.controlsfx:controlsfx:11.1.0" />
+      <element id="library" level="project" name="Maven: com.miglayout:miglayout-core:11.0" />
+      <element id="library" level="project" name="Maven: com.miglayout:miglayout-swing:11.0" />
     </root>
   </artifact>
 </component>

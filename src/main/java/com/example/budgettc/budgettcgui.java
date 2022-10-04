@@ -6,7 +6,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.lang.*;
+import javax.print.attribute.Attribute;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.text.*;
+import javax.swing.text.html.StyleSheet;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
 import java.util.*;
@@ -26,14 +30,18 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.*;
 import org.jfree.chart.renderer.xy.XYAreaRenderer;
+//import org.jfree.chart.renderer.xy.XYAreaRenderer2;
 import org.jfree.chart.renderer.xy.XYAreaRenderer2;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
+//import org.jfree.data.general.DefaultPieDataset;
+//mport org.jfree.data.xy.DefaultTableXYDataset;
+//import org.jfree.data.xy.XYSeries;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.data.general.PieDataset;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
+import net.miginfocom.swing.MigLayout;
 
 
 public class budgettcgui extends JFrame implements ActionListener {
@@ -55,21 +63,36 @@ public class budgettcgui extends JFrame implements ActionListener {
     public static JPanel y; //Houses both the center Customizable Pane and the East Customizable Pane
     public static JComponent centerCustimizablePane = new JPanel(); //Houses center section pane that is easily customizable
     public static JComponent eastCustimizablePane = new JPanel(); //Houses east side pane that is easily customizable
-    public static JSplitPane center;  //Houses the center section of UI
+    public static JTabbedPane subHandlerTabbedPane;
+    public static JPanel center;  //Houses the center section of UI
     public static JPanel eastSide; //Houses the east side of UI
+
 
     public static JPanel calcPanel; //Houses the Calculator Panel
     public static JPanel cards; //Holds the cards for the Calculator Panel
+
+    //Unassigned
+    public static boolean DEBUG = false;
+    public static CreateExpenseLogTable newExpenseTable;
+     public static SubBudgetExpenseLogTable subBudgetExpenseTable;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException,
             IllegalAccessException, UnsupportedLookAndFeelException {
         budgettcgui programm = new budgettcgui();
 
+        if(DEBUG)
+            System.out.println("Initializing look and feel");
+        //File file = new File(budgettcgui.class.getResource("Contrast.theme.json").getFile());
+       IntelliJTheme.setup( budgettcgui.class.getResourceAsStream("/Contrast.theme.json"));
+        //System.out.print(budgettcgui.class.getResourceAsStream("/Contrast.theme.json"));
+        subHandlerTabbedPane =  new JTabbedPane(JTabbedPane.TOP);
 
-        System.out.println("Initializing look and feel");
-        File file = new File("./src/main/resources/Contrast.theme.json");
-        IntelliJTheme.setup(file.getAbsoluteFile().toURI().toURL().openStream());
-        programm.start();
+        subBudgetExpenseTable = new SubBudgetExpenseLogTable();
+
+        subHandlerTabbedPane.addTab("Allocated Expenses" , new JScrollPane(subBudgetExpenseTable.returnPane()));
+        subHandlerTabbedPane.addTab("Edit Description", new JTextPane());
+        subHandlerTabbedPane.addTab("Category Properties", new JTextPane());
+       programm.start();
 
     }
 
@@ -79,7 +102,7 @@ public class budgettcgui extends JFrame implements ActionListener {
         //Read from storage File
         storageReaderNG();
 
-        File file1 = new File("./src/main/resources/Checking1.csv");
+        InputStream file1 =  budgettcgui.class.getResourceAsStream("/Checking1.csv");
         importExpenseFromFile(file1);
 
         //Init the Frame
@@ -88,7 +111,7 @@ public class budgettcgui extends JFrame implements ActionListener {
     }
 
     //todo move create chart into its own class
-    private static PieDataset createDataset() {
+   private static DefaultPieDataset createDataset() {
 
         DefaultPieDataset dataset = new DefaultPieDataset();
         for (int x = 0; x < storageMatrix.size(); x++) {
@@ -198,23 +221,32 @@ public class budgettcgui extends JFrame implements ActionListener {
         } else if ("Switch-Panel".equals(e.getActionCommand())) {
             if (centerCustimizablePane != handler) {
                 centerCustimizablePane = handler;
-                JPanel jp1 = new JPanel(new GridLayout());
-                jp1.add(tabbedPane);
                 eastCustimizablePane = tabbedPane;
-            } else {
 
-                JPanel jp1 = new JPanel(new GridLayout());
-                jp1.add(tabbedPane);
+            } else {
                 centerCustimizablePane = tabbedPane;
                 eastCustimizablePane = handler;
             }
-            changePanels(0);
+            changePanels(false);
             frame.revalidate();
             frame.repaint();
 
-            //out.println("hi---------------------------------------------------------------------------");
 
+        } else if ("Add Income Category".equals(e.getActionCommand())) {
+            try {
+                out.println("USER ACTION: Button pressed");
+                budgettcgui.initializeHandler(IncomeCategory.addNewIncome("",0.0, null));
 
+            } finally {
+            }
+        }
+        else if ("Add Budget Category".equals(e.getActionCommand())) {
+            try {
+                out.println("USER ACTION: Button pressed");
+                budgettcgui.initializeHandler(BudgetCategory.addNewCategory());
+
+            } finally {
+            }
         }
     }
 
@@ -222,11 +254,13 @@ public class budgettcgui extends JFrame implements ActionListener {
     //---------------------------INITIALIZE HELPER METHODS HERE-------------------------------------
     //sets the initial look and feel of the application
     public static void initializeLookAndFeel(LookAndFeel newLookAndFeel) {
-        out.println("USER ACTION: Look and feel change requested");
+        if(DEBUG)
+            out.println("USER ACTION: Look and feel change requested");
         try {
             FlatLaf.registerCustomDefaultsSource("com.myapp.themes");
             FlatDarkLaf.setup();
-            out.println("USER RESULT: Look and feel changing from " + (UIManager.getLookAndFeel()) + " to " + newLookAndFeel);
+            if(DEBUG)
+                out.println("USER RESULT: Look and feel changing from " + (UIManager.getLookAndFeel()) + " to " + newLookAndFeel);
             UIManager.setLookAndFeel(newLookAndFeel);
         } catch (Exception ex) {
             System.err.println("ERROR: Failed to initialize look and feel");
@@ -237,7 +271,7 @@ public class budgettcgui extends JFrame implements ActionListener {
     }
 
     public static CreateIncomeTable initializeIncomeTable() {
-        String[] columnNames = {"Name", "Type", "Amount"};
+        String[] columnNames = {"Income Name", "Type", "Amount"};
         Object[][] temp = new Object[incomeList.size()][3];
         for (int x = 0; x < incomeList.size(); x++) {
             temp[x][0] = incomeList.get(x).getIncomeName();
@@ -251,7 +285,7 @@ public class budgettcgui extends JFrame implements ActionListener {
     }
 
     public static CreateTable initializeBudgetTable() {
-        String[] columnNames = {"Category", "Amount Allocated", "HI"};
+        String[] columnNames = {"Budget Category", "Amount Allocated", "HI"};
         Object[][] temp = new Object[storageMatrix.size()][2];
         for (int x = 0; x < storageMatrix.size(); x++) {
             temp[x][0] = storageMatrix.get(x).getCategoryName();
@@ -264,26 +298,47 @@ public class budgettcgui extends JFrame implements ActionListener {
 
 
     public static CreateExpenseLogTable initializeExpenseTable() {
-        String[] expenseColumnNames = {"Expense","Amount"};
+
         Object[][] temp = new Object[expenseList.size()][3];
         for (int x = 0; x < expenseList.size(); x++) {
             temp[x][0] = expenseList.get(x).getExpenseName();
             temp[x][1] = expenseList.get(x).getExpenseAmount();
+            temp[x][2] = expenseList.get(x);
         }
-
-        CreateExpenseLogTable newExpenseTable = new CreateExpenseLogTable(temp, expenseColumnNames);
+        newExpenseTable = new CreateExpenseLogTable(temp);
         newExpenseTable.setOpaque(true);
         return newExpenseTable;
     }
 
-    public static void changePanels(int what) {
+    //todo rework so that all the panels dont have to be reloaded, only the ones that really need to be.
+    public static void changePanels(boolean alsoWestSide) {
         Component[] components = y.getComponents();
-        out.println(components.length);
-        y.remove(1);
-        y.remove(1);
+        if(DEBUG)
+            out.println(components.length);
+
+        if(alsoWestSide){
+        y.remove(0);
+        y.remove(0);
+        y.remove(0);}
+        else{
+            y.remove(1);
+            y.remove(1);
+
+        }
         //y.remove(2);
 
         GridBagConstraints d = new GridBagConstraints();
+        if(alsoWestSide) {
+            d.fill = GridBagConstraints.BOTH;
+            d.weightx = .5;
+            d.weighty = 1;
+            d.gridwidth = 1;
+            d.gridx = 0;
+            d.gridy = 1;
+            y.add(initializeWestSide());
+        }
+
+
         d.fill = GridBagConstraints.BOTH;
         d.weightx = .5;
         d.weighty = 1;
@@ -334,6 +389,7 @@ public class budgettcgui extends JFrame implements ActionListener {
         d.gridwidth = 1;
         d.gridx = 0;
         d.gridy = 1;
+        initializeExpenseTable();
         y.add(initializeWestSide());
 
         createChart(1);
@@ -342,9 +398,8 @@ public class budgettcgui extends JFrame implements ActionListener {
         createTabbedPane();
 
         centerCustimizablePane = handler;
-        JPanel jp1 = new JPanel(new GridLayout());
-        jp1.add(tabbedPane);
-        eastCustimizablePane = jp1;
+        eastCustimizablePane = tabbedPane;
+
 
 
         d.fill = GridBagConstraints.BOTH;
@@ -371,12 +426,67 @@ public class budgettcgui extends JFrame implements ActionListener {
         // 5. Show it.
         frame.setVisible(true);
 
-        System.out.println("Current Look and Feel: " + UIManager.getLookAndFeel());
+        if(DEBUG)
+            System.out.println("Current Look and Feel: " + UIManager.getLookAndFeel());
     }
 
     public static JPanel initializeInfoDiagram() {
-        JPanel info = new JPanel();
-        info.add(new JButton("This is where the summarized calculations will go!"));
+        JPanel info = new JPanel(new GridLayout(1,3));
+
+        info.add(new IncomeInfoRingChart(2000.0,IncomeCategory.getTotalIncome()));
+        JTextPane textPane = new JTextPane();
+        StyledDocument doc = textPane.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+        /*textPane.setText(" This is where the summarized calculations will go!: \n" +
+                "\nTotal Amount Budgeted: " + BudgetCategory.getTotalBudgetAmount() +
+                "\nIncome Amount: $ " + IncomeCategory.getTotalIncome());
+        textPane.setEditable(false);*/
+        //info.add(textPane);
+
+
+        StyledDocument document = textPane.getStyledDocument ();
+
+        Style defaultStyle = StyleContext.getDefaultStyleContext ().getStyle (StyleContext.DEFAULT_STYLE);
+        Style regular = document.addStyle ("regular", defaultStyle);
+        StyleConstants.setFontFamily (regular, "Corbert");
+        StyleConstants.setFontSize (regular, 14);
+
+        Style redBold = document.addStyle ("redBold", defaultStyle);
+        StyleConstants.setFontFamily (redBold, "Corbert");
+        StyleConstants.setFontSize (redBold, 20);
+        StyleConstants.setForeground(redBold,Color.red);
+        StyleConstants.setBold(redBold,true);
+        StyleConstants.setAlignment(redBold,StyleConstants.ALIGN_CENTER);
+
+        Style blueBold = document.addStyle ("blueBold", defaultStyle);
+        StyleConstants.setFontFamily (blueBold, "Corbert");
+        StyleConstants.setFontSize (blueBold, 20);
+        StyleConstants.setForeground(blueBold, new Color(1, 73, 124));
+        StyleConstants.setBold(blueBold,true);
+        StyleConstants.setAlignment(blueBold,StyleConstants.ALIGN_CENTER);
+
+        Style greenBold = document.addStyle ("greenBold", defaultStyle);
+        StyleConstants.setFontFamily (greenBold, "Corbert");
+        StyleConstants.setFontSize (greenBold, 20);
+        StyleConstants.setForeground(greenBold,  new Color(40, 115, 0));
+        StyleConstants.setBold(greenBold,true);
+        StyleConstants.setAlignment(greenBold,StyleConstants.ALIGN_CENTER);
+        try {
+            document.insertString(document.getLength(), "Total Amount Budgeted:\n", regular);
+            document.insertString(document.getLength(),"$"+formatter.format(Double.parseDouble(budgettcgui.decimalFormatter.format(BudgetCategory.getTotalBudgetAmount())))+"\n",blueBold);
+            document.insertString(document.getLength(), "Total Income Budgeted:\n", regular);
+            document.insertString(document.getLength(),"$"+formatter.format(Double.parseDouble(budgettcgui.decimalFormatter.format(IncomeCategory.getTotalIncome())))+"\n",greenBold);
+            document.insertString(document.getLength(), "Total Expenses Allocated:\n", regular);
+            document.insertString(document.getLength(),"$"+formatter.format(Double.parseDouble(budgettcgui.decimalFormatter.format(-ExpenseCategory.totalAllocatedExpenseAmount)))+"\n",redBold);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        info.add(textPane);
+
+        info.add(new BudgetInfoRingChart(8700.0,BudgetCategory.getTotalBudgetAmount()));
         return info;
     }
 
@@ -398,7 +508,7 @@ public class budgettcgui extends JFrame implements ActionListener {
                 handler = s;
                  eastCustimizablePane = handler;}
 
-            changePanels(0);
+            changePanels(false);
             frame.revalidate();
             frame.repaint();
         }
@@ -484,7 +594,13 @@ public class budgettcgui extends JFrame implements ActionListener {
 
         menu.add(tbutton);
         menuBar.add(menu);
-        menuBar.add(new JMenu("Import"));
+
+
+        JMenu importMenu = new JMenu("Import");
+        importMenu.add(new JMenuItem("Import Expenses from .CSV"));
+        importMenu.add(new JMenuItem("Import Expenses from .OFX"));
+        importMenu.add(new JMenuItem("Setup Bank Information"));
+        menuBar.add(importMenu);
         menuBar.add(new JMenu("Export"));
         menuBar.add(new JMenu("Help"));
 
@@ -493,74 +609,72 @@ public class budgettcgui extends JFrame implements ActionListener {
         panel1.add(label1);
         panel1.add(themeChooser);
         menuBar.add(Box.createHorizontalGlue());
-        //themeChooser.setBackground(new Color(255, 255, 255, 11));
-        //themeChooser.setBorder(BorderFactory.createEmptyBorder());
+        menuBar.add(Box.createHorizontalGlue());
+        //menuBar.add(new JMenuItem("Application Log"));
+        menuBar.add(Box.createHorizontalGlue());
+        themeChooser.setBackground(new Color(255, 255, 255, 11));
+        themeChooser.setBorder(BorderFactory.createEmptyBorder());
         //menuBar.add(label1);
-        //menuBar.add(themeChooser);
-        long millis=System.currentTimeMillis();
-        java.util.Date date=new java.util.Date(millis);
+       // menuBar.add(themeChooser);
         menuBar.add(new ClockPane());
 
         return menuBar;
     }
 
-    public static JPanel initializeWestSide() {
+    public static JSplitPane initializeWestSide() {
         JPanel westSide = new JPanel(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
 
-        c.weightx = 1;
-        c.weighty = .3;
-        c.gridwidth = 0;
-        c.gridx = 0;
-        c.gridy = 0;
+        //Will hold the Income table and the budget table.
+        JSplitPane topSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
-        westSide.add(initializeIncomeTable(), c);
-
-        c.weighty = .45;
-        c.gridy = 1;
-        westSide.add(initializeBudgetTable(), c);
+        //Will hold the topSplitPane and the expense table to that all the splitpanes combined will allows for 3 sections for each table.
+        JSplitPane bottomSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
 
-        c.weighty = .25;
-        c.gridy = 2;
-        westSide.add(initializeExpenseTable(), c);
-        return westSide;
+        //income table weight = .30%
+        topSplitPane.setTopComponent(initializeIncomeTable());
+
+        //budget table weight = 40%
+        topSplitPane.setBottomComponent(initializeBudgetTable());
+
+        //expense table weight = 30%
+
+        bottomSplitPane.setTopComponent(topSplitPane);
+        bottomSplitPane.setBottomComponent(newExpenseTable);
+        topSplitPane.setResizeWeight(0.40);
+        bottomSplitPane.setResizeWeight(0.65);
+
+        return bottomSplitPane;
     }
 
     public static JPanel initializeHeader(){
-        JPanel headerPanel = new JPanel(new GridBagLayout());
+        JPanel headerPanel = new JPanel(new BorderLayout());
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1;
-        c.weighty = .3;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-
-        JPanel panel1 = new JPanel();
-        panel1.setBackground(new Color(0xFF0000));
-        headerPanel.add(new JButton("This is where the summarized calculations will go!"), c);
+        headerPanel.add(initializeInfoDiagram(), BorderLayout.CENTER);
 
         JButton switchPanel = new JButton("<|>");
         switchPanel.setActionCommand("Switch-Panel");
         switchPanel.addActionListener(new budgettcgui());
-        c.weighty = .005;
-        c.gridx = 0;
-        c.gridy = 1;
-        headerPanel.add(switchPanel, c);
+
+        headerPanel.add(switchPanel, BorderLayout.SOUTH);
         return headerPanel;
     }
-    public static JSplitPane initializeCenter() {
 
-        center = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        center.setTopComponent(initializeHeader());
+    public static JPanel initializeCenter() {
 
-        center.setBottomComponent(centerCustimizablePane);
-        center.setResizeWeight(0.4);
-        center.setDividerLocation(0.4);
+       // center = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        center = new JPanel(new MigLayout());
+        //center.setTopComponent(initializeHeader());
+        center.add(initializeHeader()," h 25%!, wrap");
+        //center.setBottomComponent(centerCustimizablePane);
+        //center.setResizeWeight(0.25f);
+        //center.setDividerLocation(0.25f);
+        center.add(centerCustimizablePane,"h 47%!, w 98.5%!, wrap");
+
+        center.add(subHandlerTabbedPane,"h 33%!, w 98.5%!");
+        //center.set
 
 
         return center;
@@ -584,24 +698,23 @@ public class budgettcgui extends JFrame implements ActionListener {
         eastSide.setFocusable(false);
         return eastSide;
     }
-
-    public JTabbedPane createTabbedPane() {
+    public static JTabbedPane createTabbedPane() {
         tabbedPane = new JTabbedPane();
         ImageIcon icon = new ImageIcon("logo2.png");
-        JComponent panel1 = createChart(1);
-        tabbedPane.addTab("3D Chart", icon, panel1,
-                "Shows the 3D Chart");
+        BudgetPieChart panel1 = new BudgetPieChart();
+        tabbedPane.addTab("Budget Chart", icon, panel1.getBudgetChartPanel(),
+                "Shows a graphical display of this months budget");
 
         createChart(2);
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
-        JComponent panel2 = createChart(2);;
-        tabbedPane.addTab("Flat Chart", icon, panel2,
-                "Does twice as much nothing");
+        //JComponent panel2 = createChart(2);
+        IncomePieChart panel2 = new IncomePieChart();
+        tabbedPane.addTab("Income Chart", icon, panel2.getIncomeChartPanel(),
+                "Shows a graphical display of this months income");
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-
         //Add the tabbed pane to this panel.
-        add(tabbedPane);
+        //tabbedPane.add(tabbedPane);
 
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -610,9 +723,11 @@ public class budgettcgui extends JFrame implements ActionListener {
 
     public static void storageReaderNG() throws IOException, UnsupportedLookAndFeelException {
 
-        try {
-            File file = new File("./src/main/resources/storage3.txt");
-            Scanner sc = new Scanner(file);
+        //try {
+            //File file = new File("/storage3.txt");
+            InputStream x = budgettcgui.class.getResourceAsStream("/storage3.txt");
+            System.out.print(x);
+            Scanner sc = new Scanner(x);
             storageMatrix = new ArrayList<BudgetCategory>();
             incomeList = new ArrayList<IncomeCategory>();
             String line;
@@ -623,7 +738,7 @@ public class budgettcgui extends JFrame implements ActionListener {
             boolean temp = false;
             while (sc.hasNextLine()) {
                 line = sc.nextLine();
-                out.println(line);
+                //out.println(line);
                 if (line.contains("~") == false && !temp)
                     incomeList.add(new IncomeCategory(line, sc.nextLine(), Double.valueOf(sc.nextLine())));
                 if (line.contains("~") == true) {
@@ -631,7 +746,7 @@ public class budgettcgui extends JFrame implements ActionListener {
                     line = sc.nextLine();
                 }
                 if (line.contains("*") == true && temp) {
-                    out.println("hiii");
+                    //out.println("hiii");
                     if (tempMap != null)
                         storageMatrix.add(new BudgetCategory(Name, amtAllocatedForCategory, tempMap));
                     tempMap = new TreeMap<String, Double>();
@@ -646,8 +761,8 @@ public class budgettcgui extends JFrame implements ActionListener {
                 }
             }
             sc.close();
-        } catch (Exception exception) {
-        }
+       // } catch (Exception exception) {
+        //}
 
     }
 
@@ -841,9 +956,9 @@ public class budgettcgui extends JFrame implements ActionListener {
             cnt++;
         }
 
-        for (int x = 0; x < inflatedDataList.size(); x++) {
+        /*for (int x = 0; x < inflatedDataList.size(); x++) {
             out.println(inflatedDataList.get(x)[0] + ", " + inflatedDataList.get(x)[1]);
-        }
+        }*/
 
         JPanel chartPanel = createAreaChart(createXYTableDataset(uninflatedDataList, inflatedDataList));
         dataPanel.add(chartPanel);
@@ -881,6 +996,7 @@ public class budgettcgui extends JFrame implements ActionListener {
                 true,                            // tooltips
                 false                            // urls
         );
+
         XYPlot plot = (XYPlot) chart.getPlot();
         //AreaPolot
         XYAreaRenderer2 renderer = new XYAreaRenderer2();
@@ -966,10 +1082,12 @@ public class budgettcgui extends JFrame implements ActionListener {
         return panel;
     }
 
-    public static void importExpenseFromFile(File file) throws IOException, UnsupportedLookAndFeelException {
+    public static void importExpenseFromFile(InputStream file) throws IOException, UnsupportedLookAndFeelException {
 
         Scanner sc = new Scanner(file);
-        out.println("Printing File Now:");
+        boolean DEBUG = false;
+        if(DEBUG)
+            out.println("Printing File Now:");
         String line, id = "null---";
         String[] splitLine;
 
@@ -994,7 +1112,8 @@ public class budgettcgui extends JFrame implements ActionListener {
                             Integer.parseInt(splitLine[0].substring(0,2)),
                             Integer.parseInt(splitLine[0].substring(3,5))) ,
                     splitLine[4],Double.parseDouble(splitLine[1]) ));
-            out.println(" --> " + expenseList.get(expenseList.size() - 1).toString());
+            if(DEBUG)
+                out.println(" --> " + expenseList.get(expenseList.size() - 1).toString());
 
 
         }

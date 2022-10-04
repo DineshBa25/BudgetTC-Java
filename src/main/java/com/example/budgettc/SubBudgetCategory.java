@@ -39,15 +39,16 @@ public class SubBudgetCategory extends JPanel  {
     public String name;
     public Double amountAllocated;
     public ArrayList<ExpenseCategory> allocatedExpenseList;
-    public JScrollPane handler;
+    public JPanel handler;
+    public Double totalSubBudgetExpensesAllocated = 0.0;
 
 
 
-    public SubBudgetCategory(String categoryName, Double amountAllocated1, ArrayList<ExpenseCategory> allocatedExpenseList1) throws  UnsupportedLookAndFeelException  {
+    public SubBudgetCategory(String categoryName, Double amountAllocated1) throws  UnsupportedLookAndFeelException  {
         name = categoryName;
         amountAllocated = amountAllocated1;
-        allocatedExpenseList = allocatedExpenseList1;
-        initializeSubBudgetCategoryHandler();
+        initializeSubBudgetCategoryExpenseHandler();
+        allocatedExpenseList = new  ArrayList<ExpenseCategory>();
 
     }
 
@@ -88,18 +89,53 @@ public class SubBudgetCategory extends JPanel  {
      * Generates a JScrollPane handler for the Sub Budget Category. This handler leads the user to attaching
      * new expenses to the category and shows more overall information about the category
      */
-    public void initializeSubBudgetCategoryHandler() throws  UnsupportedLookAndFeelException {  }
+    public void initializeSubBudgetCategoryExpenseHandler() throws  UnsupportedLookAndFeelException {
+        //handler = new SubBudgetExpenseLogTable();
+
+    }
 
     /**
      * Gets the JScrollPane that contains the handler for the Sub-Budget Category
      * @return JScrollPane containing the Sub-Budget Handler.
      */
-    public JScrollPane getSubBudgetCategoryHandler() { return handler; }
+    public JPanel getSubBudgetCategoryHandler() { return handler; }
 
+    public String[][] getMatrixOfExpenses(){
+        String[][] tempExpenseMatrix = new String[allocatedExpenseList.size()][3];
+        int cnt = 0;
+        for(ExpenseCategory expense: allocatedExpenseList){
+            tempExpenseMatrix[cnt][0] = expense.getExpenseName();
+            tempExpenseMatrix[cnt][1] = String.valueOf(expense.getExpenseAmount());
+            cnt++;
+        }
+        System.out.println("6789---------"+Arrays.deepToString(tempExpenseMatrix));
+        return  tempExpenseMatrix;
+    }
+
+    /**
+     * Gets the JScrollPane that contains the handler for the Sub-Budget Category
+     * @return JScrollPane containing the Sub-Budget Handler.
+     */
+    public void linkExpenseCategory(ExpenseCategory expense) {
+        System.out.println("Linking Expense: " + expense);
+        totalSubBudgetExpensesAllocated += expense.getExpenseAmount();
+        //BudgetCategory.totalExpensesAllocated += expense.getExpenseAmount();
+        allocatedExpenseList.add(expense);
+        System.out.print(this);
+    }
+
+    public void removeExpenseCategory(ExpenseCategory expense) {
+
+        totalSubBudgetExpensesAllocated -= expense.getExpenseAmount();
+        //BudgetCategory.totalExpensesAllocated -= expense.getExpenseAmount();
+        allocatedExpenseList.remove(expense);
+    }
     /**
      * Returns a String containing the Name, Amount alllocated and the Expense list.
      * @return String value containing the name of the income.
      */
-    public String toString() { return "Info: " + name + " " + amountAllocated + "\n" +
-                                "Expense List: " + allocatedExpenseList;    }
+    public String toString() { return "Info: " + name + " " + amountAllocated + "\n"
+                                     +       "Expense List: " + allocatedExpenseList
+        ;
+        }
 }

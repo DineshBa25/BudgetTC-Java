@@ -1,9 +1,20 @@
 package com.example.budgettc;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.Timer;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 import java.awt.*;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,12 +28,14 @@ import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerContrastIJTheme;
 
 public class ExpenseCategory extends budgettcgui {
+    public static Map<String, Object[]> allExpenseMap = new TreeMap<>();
     public String expenseName;
     public Double expenseAmount;
     public Date expenseDate;
     public String expenseID;
-    public JPanel expenseHandler = null;
-    public static Map<String, Object[]> allExpenseMap = new TreeMap<>();
+    public JPanel expenseHandler = new JPanel();
+    public static Double totalExpenseAmount = 0.0;
+    public static Double totalAllocatedExpenseAmount = 0.0;
 
     public ExpenseCategory( Date expenseDate1, String expenseName1, Double expenseAmount1) throws UnsupportedLookAndFeelException, IOException {
         expenseName = expenseName1;
@@ -31,7 +44,40 @@ public class ExpenseCategory extends budgettcgui {
         expenseID = "expenseID1";
         Object[] temp = {expenseDate, expenseName, expenseAmount};
         allExpenseMap.put(expenseID, temp);
+        if(expenseAmount <= 0)
         initializeExpenseHandler();
+        else
+            initializePushToIncomeHandler();
+        if(expenseAmount<=0)
+            totalExpenseAmount+=expenseAmount;
+    }
+
+    private void initializePushToIncomeHandler() {
+
+
+        expenseHandler = new JPanel(new BorderLayout());
+
+
+
+
+        JTextPane textPane = new JTextPane();
+        StyledDocument doc = textPane.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+        textPane.setText("This seems like an income, change the income name and type below and add it as an income category: \n\n" +
+                "Income Name: " + getExpenseName() +
+                "\nIncome Amount: $ " + getExpenseAmount());
+        textPane.setEditable(false);
+        expenseHandler.add(textPane,BorderLayout.NORTH);
+
+        expenseHandler.add(IncomeCategory.addNewIncome(expenseName, expenseAmount, this),BorderLayout.CENTER);
+
+
+
+
+
+
     }
 
     /**
@@ -100,12 +146,15 @@ public class ExpenseCategory extends budgettcgui {
     public JPanel initializeExpenseHandler() throws UnsupportedLookAndFeelException, IOException {
         File file = new File("./src/main/resources/Contrast.theme.json");
         IntelliJTheme.setup(file.getAbsoluteFile().toURI().toURL().openStream());
+        if(super.DEBUG)
         out.println("---------------------------------------------------------------------"+budgettcgui.getLookAndFeel());
 
         BudgetTree newInstance = new BudgetTree();
 
         expenseHandler = new JPanel(new BorderLayout());
         JButton applyButton = new JButton("Apply Selection");
+        applyButton.setEnabled(false);
+        applyButton.setToolTipText("You must select a Sub-Budget Category");
 
         //JScrollPane pane = new JScrollPane(newInstance.getTree());
 
@@ -113,17 +162,119 @@ public class ExpenseCategory extends budgettcgui {
         newTree.expandRow(0);
         newTree.expandPath(newTree.getPathForRow(0));
 
-        expenseHandler.add(new JLabel("Select an appropriate budget category to allocate this expense to: \n",SwingConstants.CENTER),BorderLayout.NORTH);
+        JTextPane textPane = new JTextPane();
+        StyledDocument doc = textPane.getStyledDocument();
+        SimpleAttributeSet center = new SimpleAttributeSet();
+        StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+        doc.setParagraphAttributes(0, doc.getLength(), center, false);
+        textPane.setText("Select an appropriate budget category to allocate this expense to: \n\n" +
+                "Expense Name: " + getExpenseName() +
+                "\nExpense Amount: $ " + getExpenseAmount());
+        textPane.setEditable(false);
+        expenseHandler.add(textPane,BorderLayout.NORTH);
 
-        expenseHandler.add(newTree);
+        expenseHandler.add(new JScrollPane(newTree));
+
+        newTree.addTreeSelectionListener(new TreeSelectionListener() {
+            @Override
+            public void valueChanged(TreeSelectionEvent e) {
+                if(((DefaultMutableTreeNode)newTree.getLastSelectedPathComponent()).isLeaf()){
+                    applyButton.setToolTipText("Link this expense with the selected Sub-Budget Category");
+
+                    applyButton.setEnabled(true);
+
+                }else{
+                    applyButton.setEnabled(false);
+                }
+        }});
+        applyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                    System.out.println(BudgetTree.selectedNode);
+                    if(BudgetTree.selectedNode != null){
+                        BudgetTree.selectedNode.linkExpenseCategory(getThisExpense());
+                        totalAllocatedExpenseAmount += getThisExpense().expenseAmount;
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
+                                //out.println("hi");
+                                expenseHandler.remove(0);
+                                expenseHandler.remove(0);
+                                JTextPane textPane = new JTextPane();
+                                StyledDocument doc = textPane.getStyledDocument();
+                                SimpleAttributeSet center = new SimpleAttributeSet();
+                                StyleConstants.setAlignment(center, StyleConstants.ALIGN_CENTER);
+                                textPane.setFont(new Font("Corbert", Font.BOLD, 20));
+                                doc.setParagraphAttributes(0, doc.getLength(), center, false);
+                                textPane.setText("Expense has been linked");
+                                textPane.setBackground(Color.ORANGE);
+                                textPane.setEditable(false);
+
+                                BufferedImage myPicture = null;
+                                try {
+                                    myPicture = ImageIO.read(getClass().getResource("/logo5.png"));
+                                   // out.println(myPicture);
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                                assert myPicture != null;
+
+                                ImageLabel imglabel = new ImageLabel(new ImageIcon(myPicture));
+
+                                //expenseHandler = new JPanel(new GridLayout(1,1));
+                                JPanel newp = new JPanel(new GridLayout(1,1));
+                                newp.add(imglabel);
+                                expenseHandler.add(newp);
+                                expenseHandler.add(imglabel);
+                                expenseHandler.invalidate();
+                                expenseHandler.revalidate();
+                                expenseHandler.repaint();
+                                frame.revalidate();
+                                frame.repaint();
+
+                                Timer timer = new Timer(1000, new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        expenseHandler.removeAll();
+                                        delete();
+                                        frame.revalidate();
+                                        frame.repaint();
+                                    }
+                                });
+                                timer.setRepeats(false);
+                                timer.start();
+
+                            }
+                        });
+
+                    }
+                    else{
+                        out.println("User did not select a Sub-Budget Category");
+                    }
+
+            }
+        });
         expenseHandler.add(applyButton, BorderLayout.SOUTH);
-
+        if(super.DEBUG){
         out.println(newInstance.getTree());
-        out.println(UIManager.getLookAndFeel());
+        out.println(UIManager.getLookAndFeel());}
 
         return expenseHandler;
 
     }
+
+    public void delete(){
+
+        expenseList.remove(this);
+        newExpenseTable.removeSelectedRow(this);
+
+    }
+
+    public ExpenseCategory getThisExpense(){ return this; }
+
+    public static Double getTotalExpenseAmount(){
+        return totalExpenseAmount;
+    }
+
 
     /**
      * Returns a previously generated JPanel handler for the income.

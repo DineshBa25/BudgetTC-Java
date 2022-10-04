@@ -60,11 +60,7 @@ public class MyTableModelListener extends budgettcgui implements TableModelListe
             storageMatrix.get(row).setCategoryName(data.toString());
             if(column == 1)
             storageMatrix.get(row).setAmountAllocated(Double.parseDouble(data.toString()));
-            /*try{
-                storageWriter();
-            } catch(java.io.IOException x){
-                    out.println("createDirectory failed:" + x);
-            }*/
+
             createChart(1);
             int currIndex = tabbedPane.getSelectedIndex();
             createTabbedPane();
@@ -73,18 +69,19 @@ public class MyTableModelListener extends budgettcgui implements TableModelListe
             jp1.add(tabbedPane);
 
             if(eastCustimizablePane==handler) {
-
-                centerCustimizablePane= jp1;
+                out.println("hi");
+                centerCustimizablePane= createTabbedPane() ;
                 centerCustimizablePane.repaint();
             }
             else
             {
-                eastCustimizablePane= jp1;
+                eastCustimizablePane= createTabbedPane() ;
                 eastCustimizablePane.repaint();
             }
 
-            changePanels(1);
-
+            changePanels(false);
+            frame.revalidate();
+            frame.repaint();
 
 
         }

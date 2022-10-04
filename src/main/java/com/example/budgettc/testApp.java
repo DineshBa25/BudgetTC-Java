@@ -141,13 +141,7 @@ public class testApp extends JFrame implements ActionListener {
 
         frame.add(b2,BorderLayout.NORTH);
 
-        String[] expenseColumnNames = { "Expense", "Date Due", "Ammount", "Link" , "Go"};
-        CreateExpenseLogTable newExpenseTable = new CreateExpenseLogTable(storage, expenseColumnNames);
-        newContentPane.setOpaque(true); // content panes must be opaque
 
-
-        JButton expenseLogTemp = new JButton("This is where the expense log resource will go");
-        westSide.add(newExpenseTable);
         // .add(new JScrollPane(table));
         JButton endTemp = new JButton(
                 "This is where the calculators will go");

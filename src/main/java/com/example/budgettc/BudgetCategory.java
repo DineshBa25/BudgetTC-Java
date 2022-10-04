@@ -1,76 +1,60 @@
 package com.example.budgettc;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Stack;
-
-//This class create a JPanel for each budget category and all customizations to each budget category will go here
-
-/*
-# Per Main Category #
-Name of Category
-Amount Allocated
-Color
-Sub Budget
-JPanel
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.*;
+import static java.lang.System.out;
 
 
-# Per Sub-Budget
-Name
-Amount Allocated
-
-
-Each Category should be defined in a matrix withing the main class. This class contains everything that descends from that main category.
-*/
-public class BudgetCategory extends JPanel  {
+public class BudgetCategory extends budgettcgui  {
+    //todo implement a color variable that stores the color of the budget category
     public String name = "";
     public Double amt = 0.0;
-    public Map subBudget = null;
-    public JPanel handler = null;
+    public TreeMap<String,SubBudgetCategory> subBudgetInstanceMap = new TreeMap<String,SubBudgetCategory>();
+    public static TreeMap<String,SubBudgetCategory> localSubBudgetInstanceMap= new TreeMap<String,SubBudgetCategory>();
+    //public static TreeMap<String,SubBudgetCategory> subBudgetInstanceMap = new TreeMap<String,SubBudgetCategory>();
+    public Map<String, SubBudgetCategory> subBudget;
+    public JPanel handler2 = null;
+    public static double totalBudgetAmount;
     public static JScrollPane l = new JScrollPane();
-
     public static BudgetTree allBudgetJTree = new BudgetTree();
+    public static JTabbedPane subBudgetHandlerPane;
+    public Double totalExpensesAllocated = 0.0;
+    //public static final SubBudgetExpenseLogTable tempTable = new SubBudgetExpenseLogTable();
+    //public static Tab
+
 
 
 
     public BudgetCategory(String categoryName,Double amountAllocated,Map subBudgetMap) throws  UnsupportedLookAndFeelException  {
+        //put the data into class variables
         name = categoryName;
         amt = amountAllocated;
         subBudget = subBudgetMap;
-        initializeSubBudgetHandler();
+        totalBudgetAmount += amountAllocated;
 
-        //System.out.println("---------------------------------------------------------------------hi");
-        allBudgetJTree.addToTree(categoryName, subBudget);
+    subBudgetHandlerPane = new JTabbedPane();
+        //for each Sub-Budget category in the Sub-Budget provided, this creates a SubBudgetCategory instance of the Sub-Budget
+        // and puts it in a map that links Sub-Budget name to its SubBudgetCategory instance
+        //localSubBudgetInstanceMap  = new TreeMap<String,SubBudgetCategory>();
 
-
-    }
-
-public static JTree initTree(){
-    DefaultMutableTreeNode top =
-            new DefaultMutableTreeNode("The expenses");
-    JTree temp = new JTree(top);
-    temp.addTreeSelectionListener(new TreeSelectionListener() {
-        @Override
-        public void valueChanged(TreeSelectionEvent e) {
-            System.out.println("new selection");
+        for(Object each: subBudgetMap.keySet()) {
+            SubBudgetCategory temp =  new SubBudgetCategory(each.toString(), (double) subBudgetMap.get(each));
+            subBudgetInstanceMap.put(each.toString(), temp);
+            localSubBudgetInstanceMap.put(each.toString(), temp);
         }
-    });
-    return temp;
-}
 
-    public static JTree getAllBudgetJTree() {
-        return new JTree();
+
+
+        //Create the Sub-Budget handler for this Budget Category
+        initializeSubBudgetHandler();
+        //add the category to the budget tree, so that the user can select it when trying to allocate and expense to this category
+        allBudgetJTree.addToTree(categoryName, subBudgetInstanceMap);
     }
 
     /**
@@ -78,82 +62,33 @@ public static JTree initTree(){
      * @return String containing the name of category.
      */
     public void initializeSubBudgetHandler() throws  UnsupportedLookAndFeelException {
-        JPanel newPanel = new JPanel(new GridLayout(2, 1));
-        JSplitPane newPanel1 = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        handler = new JPanel(new GridLayout(1,1));
+        //handler is initialized with a Grid Layout because in a BorderLayout, the JSplitPane is not forced to use all the space
+        handler2 = new JPanel(new GridLayout(1,1));
 
-        //UIManager.setLookAndFeel(new FlatMaterialDarkerContrastIJTheme());
-        JButton x = new JButton("hellooooooooo");
-        x.setFocusable(false);
-
-
-        String[] labels = {"Name: ", "Fax: ", "Email: "};
-        int numPairs = labels.length;
-
-//Create and populate the panel.
-        JPanel p = new JPanel(new SpringLayout());
-        for (int i = 0; i < numPairs; i++) {
-            JLabel l = new JLabel(labels[i], JLabel.TRAILING);
-            p.add(l);
-            JTextField textField = new JTextField(10);
-
-            l.setLabelFor(textField);
-            p.add(textField);
-        }
-
-//Lay out the panel.
-        SpringUtilities.makeCompactGrid(p,
-                numPairs, 2, //rows, cols
-                6, 6,        //initX, initY
-                6, 6);       //xPad, yPad
-        p.setMinimumSize(new Dimension(0,0));
-
-
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1;
-        c.weighty = .2;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 0;
-        //handler.add(p,c);
-        newPanel.add(initializeSubBudgetTable());
+        //Create a text area that allows to user to store information about the budget category
+        //todo Move text area to its own method so that it can be stored in .budget File
         JTextArea textArea = new JTextArea();
-        //newPanel1.setTopComponent(initializeSubBudgetTable());
         textArea.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Short Description", TitledBorder.LEFT,
+                BorderFactory.createEtchedBorder(0,new Color(0x949494),new Color(0x949494)), "Short Description", TitledBorder.CENTER,
                 TitledBorder.TOP));;
-        //textArea.setBackground(new Color(58, 58, 58));
         textArea.setText("Write about what kinds of expenses go into this category ");
-        newPanel.add(textArea);
-        //newPanel1.setBottomComponent(addToBudgetTree());
-        JColorChooser colorChooser = new JColorChooser();
-        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
-        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
-        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
-        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
-        colorChooser.setPreviewPanel(new JPanel());
-        //JPanel test = new JPanel(new GridLayout(1,2));
-        JPanel pt = new JPanel();
-        pt.setLayout(new BorderLayout());
-        pt.setBorder(new EmptyBorder(16, 16, 16, 16));
-        JButton chooseColor = new JButton("Choose Color");
-        pt.add(chooseColor);
 
-
+        //Create the user Fields that will go into the userFieldsPanel
         JTextField currentAgeField = new JTextField(10);
         JTextField finalAgeField = new JTextField(10);
         JTextField amtSavedField = new JTextField(10);
 
+
+        //currentAgeField.setFocusable(false);
+        //finalAgeField.setFocusable(false);
+        //List of all the generated components that will go into the userFieldsPanel
         JComponent[] components = {
                 currentAgeField,
                 finalAgeField,
-                chooseColor,
-
-
+                generateColorChooserButton(),
         };
 
+        //List of labels that will be assigned to each component above in the userFieldsPanel
         JLabel[] labels1 = {
                 new JLabel("Category Name: "),
                 new JLabel("Amount allocated for Category: "),
@@ -161,253 +96,286 @@ public static JTree initTree(){
 
         };
 
-        JPanel columnLayout = new JPanel();
-        columnLayout.add(getTwoColumnLayout(labels1,components),BorderLayout.CENTER);
+        //Panel that holds all the user entry fields for customizing the budget categories
+        JPanel userFieldsPanel = new JPanel();
+        userFieldsPanel.add(getTwoColumnLayout(labels1,components), BorderLayout.CENTER);
+/*
+        JPanel newp = new JPanel(new GridLayout(1,1));
+        //out.println("***********************************************"+subBudgetExpenseTable.initScrollPane().getComponentCount());
+        //newp.add(new SubBudgetExpenseLogTable());
 
+        //tempTable = subBudgetExpenseTable;
 
+        ///ystem.out.println(tempTable.returnPane());
+        System.out.println("hiiiiiiiiiiiiiiii" + tempTable.returnPane().getPreferredSize());
+        subBudgetHandlerPane.addTab("Allocated Expenses",tempTable.returnPane());
+        subBudgetHandlerPane.addTab("Short Description", textArea);
+*/
+        // Initialize two vertical JSplitPanes
+        // two JSplitPanes are need so that there can be a 3 layered JSplitPane
+        JSplitPane splitPaneTop= new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        JSplitPane splitPaneBottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
+        //add all the components to the JSplitPanes
+        splitPaneTop.setTopComponent(userFieldsPanel);
+        splitPaneTop.setBottomComponent(initializeSubBudgetTable());
+        splitPaneBottom.setTopComponent(splitPaneTop);
+        splitPaneBottom.setBottomComponent(subHandlerTabbedPane);
 
+        boolean firstResize = true;
+        splitPaneBottom.addComponentListener(new ComponentAdapter(){
+            boolean firstResize = true;
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if(firstResize){
+                    splitPaneBottom.setDividerLocation(0.55);
+                    firstResize = false;
+                }
+            }
+        });
+        //add the JSplitPanes to the handler
+        handler2.add(splitPaneBottom);
+        handler2.setFocusable(false); //because only tables should be focusable
+    }
 
-        //andler.add(columnLayout,c);
-        handler.repaint();
+    /**
+     * Generates a JButton that displays a color chooser for the category when pressed.
+     * @return JButton containing a color chooser dialog.
+     */
+    public JButton generateColorChooserButton() {
+        //create the JColor chooser and remove all the panels of the color chooser that are not needed
+        JColorChooser colorChooser = new JColorChooser();
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.removeChooserPanel(colorChooser.getChooserPanels()[1]);
+        colorChooser.setPreviewPanel(new JPanel());
+
+        //todo make the chooseColor button background the color of the budget categories color upon start.
+        //create the JButton that allows the user to access the color chooser
+        JButton chooseColor = new JButton("Choose a Color");
+
+        //Action Listener that responds when the user presses "OK" on the color chooser
         ActionListener okActionListener = new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("OK Button");
-                System.out.println(colorChooser.getColor());
+                out.println("OK Button");
+                out.println(colorChooser.getColor());
                 chooseColor.setBackground(colorChooser.getColor());
-                handler.repaint();
-                handler.revalidate();
+                handler2.repaint();
+                handler2.revalidate();
             }
         };
 
+        //Action Listener that responds when the user presses "Cancel" on the color chooser
         ActionListener cancelActionListener = new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                System.out.println("Cancel Button");
+            public void actionPerformed(ActionEvent actionEvent) {out.println("Cancel Button");
             }
         };
 
+        //When the user pressed the color chooser button, generated a dialog that displays the color chooser
         chooseColor.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                JColorChooser.createDialog(null,
+            public void actionPerformed(ActionEvent e) {JColorChooser.createDialog(null,
                         "Pick a color", true,
                         colorChooser,okActionListener, cancelActionListener).setVisible(true);
             }
         });
 
-
-        //test.add(textArea);
-        //test.add(colorChooser);
-        c.weighty = .6;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 1;
-    textArea.setPreferredSize(new Dimension((int) textArea.getPreferredSize().getWidth(),20));
-
-
-
-        JSplitPane splitPaneLeft = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        JSplitPane splitPaneRight = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-        splitPaneLeft.setTopComponent( columnLayout );
-        splitPaneLeft.setBottomComponent( initializeSubBudgetTable() );
-        splitPaneRight.setTopComponent( splitPaneLeft );
-        System.out.println("***********************" +allBudgetJTree);
-        splitPaneRight.setBottomComponent(textArea);
-
-
-        handler.add(splitPaneRight);
-        handler.setFocusable(false);
-    }
-
-    public CreateSubBudgetTable initializeSubBudgetTable() {
-        String[] columnNames = { "Name", "Amount"};
-        Object[][] subMatrix = new Object[subBudget.size()][2];
-        Object[] tempset =  subBudget.keySet().toArray();
-        for(int x = 0 ; x < subBudget.size(); x++) {
-            subMatrix[x][0] = tempset[x];
-            subMatrix[x][1] = subBudget.get(tempset[x]);
-        }
-        for (Object[] row : subMatrix)
-            // converting each row as string and then printing in a separate line
-            System.out.println(Arrays.toString(row));
-        CreateSubBudgetTable newContentPane = new CreateSubBudgetTable(subMatrix, columnNames);
-        newContentPane.setOpaque(true); // content panes must be opaque
-        return newContentPane;
-    }
-
-    public CreateSubBudgetTable initializeSubBudgetTableNG() {
-        String[] columnNames = { "Name", "Amount"};
-        Object[][] subMatrix = new Object[subBudget.size()][2];
-        Object[] tempset =  subBudget.keySet().toArray();
-        for(int x = 0 ; x < subBudget.size(); x++) {
-            subMatrix[x][0] = tempset[x];
-            subMatrix[x][1] = subBudget.get(tempset[x]);
-        }
-        for (Object[] row : subMatrix)
-            // converting each row as string and then printing in a separate line
-            System.out.println(Arrays.toString(row));
-        CreateSubBudgetTable newContentPane = new CreateSubBudgetTable(subMatrix, columnNames);
-        newContentPane.setOpaque(true); // content panes must be opaque
-        return newContentPane;
-    }
-
-    public JPanel getJPanel()
-    {
-        return handler;
+        return chooseColor; //return the color choose button
     }
 
     /**
-     * Returns the of budget category contained in the class.
+     * Generates the Sub-Budget Table by feeding it data about the Budget Category.
+     * @return returns a CreateSubBudgetTable type which is essentially a table.
+     */
+    public CreateSubBudgetTable initializeSubBudgetTable() {
+        String[] columnNames = { "Name", "Amount"};
+        Object[][] subMatrix = new Object[subBudgetInstanceMap.size()][3];
+        Object[] subBudgetKeySet = subBudgetInstanceMap.keySet().toArray();
+
+        //Create a matrix for the Sub Budget Table using the subBudget Map.
+        for(int i = 0; i < subBudgetKeySet.length; i++) {
+            subMatrix[i][0] = subBudgetInstanceMap.get(subBudgetKeySet[i]).getCategoryName();
+            subMatrix[i][1] = subBudgetInstanceMap.get(subBudgetKeySet[i]).getAmountAllocated();
+            subMatrix[i][2] = subBudgetInstanceMap.get(subBudgetKeySet[i]);
+
+        }
+
+        //System.out.println("Sub Matrix: ---->\n" + Arrays.deepToString(subMatrix));
+        CreateSubBudgetTable newSubBudgetTable = new CreateSubBudgetTable(subMatrix, columnNames);
+        newSubBudgetTable.setOpaque(true); // content panes must be opaque
+        return newSubBudgetTable;
+    }
+
+    public static void setSubBudgetHandler(SubBudgetCategory subBudgetCategory){
+        out.println("*Setting pane ========= " + subBudgetCategory + " \n" + subBudgetHandlerPane.getTabCount());
+
+        //subBudgetHandlerPane.addTab("Allocated Expenses",subBudgetCategory.getSubBudgetCategoryHandler());
+        //subBudgetHandlerPane.remove(0);
+        subBudgetHandlerPane.revalidate();
+        subBudgetHandlerPane.repaint();
+        changePanels(false);
+        handler.revalidate();
+        handler.repaint();
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    /**
+     * Returns the handler for the Budget Category
+     * @return JPanel containing handler for the Budget Category.
+     */
+    public JPanel getJPanel()
+    {
+        return handler2;
+    }
+
+    /**
+     * Sets the name of budget category contained in the class.
+     * @return String containing the new name of category.
+     * @param newName New name to be changed to.
+     */
+    public String setCategoryName(String newName){
+        return name = newName;
+    }
+
+    /**
+     * Returns the name of budget category contained in the class.
      * @return String containing the name of category.
      */
     public String getCategoryName(){
         return name;
     }
 
-    public Double getAmountAllocated(){
-        return amt;
-    }
-    public Map getSubBudget(){
-        return subBudget;
-    }
-
-    public String setCategoryName(String newName){
-        name = newName;
-        return name;
-    }
-
+    /**
+     * Sets the amount allocated for the budget category contained in the class.
+     * @return Double value containing the new amount allocated for the budget category contained in the class.
+     * @param newAmt New Amount to be allocated to the Budget Category
+     */
     public double setAmountAllocated(Double newAmt){
+        totalBudgetAmount-= amt;
+        totalBudgetAmount+= newAmt;
         amt = newAmt;
         return amt;
     }
 
-
-
-    private static class BookInfo {
-        public String bookName;
-
-        public BookInfo(String book) {
-            bookName = book;
-        }
-
-        public String toString() {
-            //System.out.println("----------------------------------------------------"+bookName);
-            return bookName;
-        }
+    /**
+     * Returns the amount allocated for the budget category contained in the class.
+     * @return Double value containing amount allocated for the budget category contained in the class.
+     */
+    public Double getAmountAllocated(){
+        return amt;
     }
 
-    private static void createNodes(DefaultMutableTreeNode top) {
-        DefaultMutableTreeNode category = null;
-        DefaultMutableTreeNode book = null;
-
-        category = new DefaultMutableTreeNode("Books for Java Programmers");
-        top.add(category);
-
-        //original Tutorial
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Tutorial: A Short Course on the Basics"));
-        category.add(book);
-
-        //Tutorial Continued
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Tutorial Continued: The Rest of the JDK"));
-        category.add(book);
-
-        //JFC Swing Tutorial
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The JFC Swing Tutorial: A Guide to Constructing GUIs"));
-        category.add(book);
-
-        //Bloch
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("Effective Java Programming Language Guide"));
-        category.add(book);
-
-        //Arnold/Gosling
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Programming Language"));
-        category.add(book);
-
-        //Chan
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Developers Almanac"));
-        category.add(book);
-
-        category = new DefaultMutableTreeNode("Books for Java Implementers");
-        top.add(category);
-
-        //VM
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Virtual Machine Specification"));
-        category.add(book);
-
-        //Language Spec
-        book = new DefaultMutableTreeNode(new BookInfo
-                ("The Java Language Specification"));
-        category.add(book);
+    /**
+     * Returns the total amount allocated for the entire budget.
+     * @return Double value containing total amount allocated for the entire budget.
+     */
+    public static Double getTotalBudgetAmount(){
+        return totalBudgetAmount;
     }
 
+    /**
+     * Returns the total dollar amount of expenses allocated for the budget category contained in the class.
+     * @return  Map containing subBudget.
+     */
+    public double getTotalExpenseAllocated(){
+        int total = 0;
+        //out.println("_"+subBudget.keySet());
+        //out.println(subBudgetInstanceMap.keySet());
+
+        for(String key: subBudgetInstanceMap.keySet()){
+            total += -1*subBudgetInstanceMap.get(key.toString()).totalSubBudgetExpensesAllocated;
+        //    out.println("**+"+subBudgetInstanceMap.get(String.valueOf(key)).totalSubBudgetExpensesAllocated);
+        }
+        out.println("____"+total/amt*100);
+        return total/amt*100;
+    }
+
+    /**
+     * Returns the subBudget map for the budget category contained in the class.
+     * @return  Map containing subBudget.
+     */
+    /*public Component getProgressBarTableCellComponent(){
+        JProgressBar x = new JProgressBar(0,100);
+        Color amtLeftcolor = new Color(27, 107, 0);
+        x.setBackground(amtLeftcolor);
+        Color amtSpentColor = new Color(119, 0, 0);
+        UIManager.put("ProgressBar.foreground", amtSpentColor);
+        out.println("*******************************"+storageMatrix.get(row).getTotalExpenseAllocated());
+        x.setValue((int)( -1.0 *storageMatrix.get(row).getTotalExpenseAllocated()));
+        int borderSize = 2;
+        x.setBorder(BorderFactory.createMatteBorder(borderSize,borderSize,borderSize,borderSize,new Color(0x00000FF, true)));
+        return x;
+    }*/
+
+    /**
+     * Returns the subBudget map for the budget category contained in the class.
+     * @return  Map containing subBudget.
+     */
+    public Map getSubBudget(){
+        return subBudget;
+    }
+
+
+
+    /**
+     * Generates a JPanel that allows the user to add a new category to the budget
+     * @return JPanel containing user feilds to add a new category to the budget
+     */
+    public static JPanel addNewCategory(){
+
+        //Create the user Fields/Components that will go into the userFieldsPanel
+        JTextField budgetCategoryNameField = new JTextField();
+        JTextField amountAllocatedField = new JTextField();
+
+        JButton addBudgetButton = new JButton("Add to Budget");
+        //Action listener for the user presses th addBudgetButton
+        addBudgetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Something Happened");
+                try {
+                    budgettcgui.storageMatrix.add(new BudgetCategory(budgetCategoryNameField.getText(), Double.parseDouble(amountAllocatedField.getText()), new TreeMap()));
+                } catch (UnsupportedLookAndFeelException ex) {
+                    ex.printStackTrace();
+                }
+                //reloads the panels
+                budgettcgui.changePanels(true);
+            }
+        });
+
+        //List of all the generated components that will go into the userFieldsPanel
+        JComponent[] components = {
+                budgetCategoryNameField,
+                amountAllocatedField,
+                addBudgetButton
+        };
+
+        //List of labels that will be assigned to each component above in the userFieldsPanel
+        JLabel[] labels1 = {
+                new JLabel("Budget Category Name: "),
+                new JLabel("Amount Allocated: "),
+                new JLabel("")
+        };
+
+        //Panel that holds all the user entry fields for adding a new Budget Category
+        JPanel userFieldsPanel = new JPanel();
+        userFieldsPanel.add(budgettcgui.getTwoColumnLayout(labels1,components),BorderLayout.CENTER);
+
+        return userFieldsPanel;
+    }
+
+
+    /**
+     * @return JScrollPane containing the overallbudget tree.
+     */
     public static JScrollPane getBudgetTree() {
         return l;
     }
 
 
-    /**
-     * Returns the amount allocated for budget category contained in the class.
-     * @return Double Value containing amount allocated.
-     */
-    public double amountAllocated(){
-        return 0;
-    }
-
-    public static JComponent getTwoColumnLayout(
-            JLabel[] labels,
-            JComponent[] fields) {
-        return getTwoColumnLayout(labels, fields, true);
-    }
-
-    public static JComponent getTwoColumnLayout(
-            JLabel[] labels,
-            JComponent[] fields,
-            boolean addMnemonics) {
-        if (labels.length != fields.length) {
-            String s = labels.length + " labels supplied for "
-                    + fields.length + " fields!";
-            throw new IllegalArgumentException(s);
-        }
-        JComponent panel = new JPanel();
-        GroupLayout layout = new GroupLayout(panel);
-        panel.setLayout(layout);
-        // Turn on automatically adding gaps between components
-        layout.setAutoCreateGaps(true);
-        // Create a sequential group for the horizontal axis.
-        GroupLayout.SequentialGroup hGroup = layout.createSequentialGroup();
-        GroupLayout.Group yLabelGroup = layout.createParallelGroup(GroupLayout.Alignment.TRAILING);
-        hGroup.addGroup(yLabelGroup);
-        GroupLayout.Group yFieldGroup = layout.createParallelGroup();
-        hGroup.addGroup(yFieldGroup);
-        layout.setHorizontalGroup(hGroup);
-        // Create a sequential group for the vertical axis.
-        GroupLayout.SequentialGroup vGroup = layout.createSequentialGroup();
-        layout.setVerticalGroup(vGroup);
-
-        int p = GroupLayout.PREFERRED_SIZE;
-        // add the components to the groups
-        for (JLabel label : labels) {
-            yLabelGroup.addComponent(label);
-        }
-        for (Component field : fields) {
-            yFieldGroup.addComponent(field, p, p, p);
-        }
-        for (int ii = 0; ii < labels.length; ii++) {
-            vGroup.addGroup(layout.createParallelGroup().
-                    addComponent(labels[ii]).
-                    addComponent(fields[ii], p, p, p));
-        }
-
-        return panel;
-    }
     public String toString() {
-        return name;
+        return name +" - "+ amt;
     }
 }

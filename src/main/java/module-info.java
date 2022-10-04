@@ -12,6 +12,9 @@ module com.example.budgettc {
     requires javafx.swing;
     requires org.jfree.jfreechart;
     requires com.formdev.flatlaf.extras;
+    requires com.miglayout.swing;
+    requires okhttp;
+    requires org.json;
     //requires miglayout.swing;
     //requires javafx.swing;
 

@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.util.*;
 
 import com.formdev.flatlaf.FlatDarkLaf;
+
+import static java.lang.System.in;
 import static java.lang.System.out;
 
 
@@ -21,10 +23,11 @@ public class IncomeCategory extends JPanel {
     public static Map<String, Object[]> allIncomeMap = new TreeMap<>();
 
 
-    public IncomeCategory(String incomeName1,String incomeType1, Double incomeAmountAllocated) throws UnsupportedLookAndFeelException {
+    public IncomeCategory(String incomeName1,String incomeType1, Double incomeAmountAllocated) {
         incomeName = incomeName1;
         incomeType = incomeType1;
         incomeAmount= incomeAmountAllocated;
+        incomeTotal += incomeAmountAllocated;
         Object[] temp = {incomeType, incomeAmount};
         allIncomeMap.put(incomeName,temp);
     }
@@ -105,7 +108,7 @@ public class IncomeCategory extends JPanel {
      * Returns a Double containing the combined income total for all income instances.
      * @return String value containing the current incomeType that this income is assigned.
      */
-    public Double getIncomeTotal(){
+    public static Double getTotalIncome(){
         return incomeTotal;
     }
 
@@ -116,10 +119,80 @@ public class IncomeCategory extends JPanel {
     public TreeMap<String,Double> getIncomeTotalByType(){
         return new TreeMap();
     }
+
+    /**
+     * Static method that populates handler with New Panel that allows the user to add a new Income Category
+     * @return new JPanel
+     */
+    public static JPanel addNewIncome(String name, Double amount, ExpenseCategory expenseCategory){
+        JPanel panel = new JPanel();
+
+        JTextField incomeName = new JTextField();
+        if(name.length()<10)
+            incomeName.setText(name);
+        JComboBox incomeType = generateIncomeTypeComboBox();
+        JTextField ammount = new JTextField();
+        if(amount>0)
+            ammount.setText(amount.toString());
+        JButton addIncomeButton = new JButton("Add Income");
+        addIncomeButton.setActionCommand("Add Income");
+        addIncomeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Something Happened");
+                budgettcgui.incomeList.add(new IncomeCategory(incomeName.getText(),incomeType.getSelectedItem().toString(), Double.parseDouble(ammount.getText())));
+                budgettcgui.changePanels(true);
+
+                if(expenseCategory!=null){
+                    budgettcgui.expenseList.remove(expenseCategory);
+                    budgettcgui.newExpenseTable.removeSelectedRow(expenseCategory);}
+
+                System.out.println(budgettcgui.incomeList);
+            }
+        });
+
+        JComponent[] components = {
+                incomeName,
+                incomeType,
+                ammount,
+                addIncomeButton
+
+
+        };
+
+        JLabel[] labels1 = {
+                new JLabel("Income Name: "),
+                new JLabel("Income Type: "),
+                new JLabel("Amount Received for this Income: "),
+                new JLabel("")
+
+
+        };
+
+
+        panel.add(budgettcgui.getTwoColumnLayout(labels1,components),BorderLayout.CENTER);
+
+
+        return panel;
+    }
+
+
+
+    public static JComboBox generateIncomeTypeComboBox(){
+        JComboBox incomeTypeCB = new JComboBox();
+        incomeTypeCB.addItem("Paycheck/Salary");
+        incomeTypeCB.addItem("Passive Income");
+        incomeTypeCB.addItem("Gift");
+
+
+        return incomeTypeCB;
+    }
     /**
      * Returns a String containing basic debugging information for the income instance.
      * @return String containing the Name, Amount and Income Type for the income.
      */
+
+
     public String toString(){
 
         /*

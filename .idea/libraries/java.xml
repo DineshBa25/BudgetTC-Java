@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="java">
+    <CLASSES />
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/jfreechart-1.5.2/src/test/java" />
+      <root url="file://$PROJECT_DIR$/jfreechart-1.5.2/src/main/java" />
+    </SOURCES>
+  </library>
+</component>
